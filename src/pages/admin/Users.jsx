@@ -1,24 +1,19 @@
 import { useEffect, useState } from "react"
-import { useAuth } from "@clerk/clerk-react"
-import { usersApi, setAuthToken } from "@/lib/api"
+import { usersApi } from "@/lib/api"
 import UserTable from "@/components/admin/UserTable"
 import { Input } from "@/components/ui/input"
 
 export default function AdminUsers() {
-  const { getToken } = useAuth()
   const [users,   setUsers]   = useState([])
   const [loading, setLoading] = useState(true)
   const [search,  setSearch]  = useState("")
 
   useEffect(() => {
-    const load = async () => {
-      const token = await getToken()
-      setAuthToken(token)
-      const res = await usersApi.getAll()
-      setUsers(res.data)
-    }
-    load().catch(() => {}).finally(() => setLoading(false))
-  }, [getToken])
+    usersApi.getAll()
+      .then(res => setUsers(res.data))
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
 
   const filtered = users.filter(u =>
     u.full_name?.toLowerCase().includes(search.toLowerCase()) ||

@@ -1,37 +1,31 @@
 import { useEffect, useState } from "react"
-import { useAuth } from "@clerk/clerk-react"
-import { announcementsApi, setAuthToken } from "@/lib/api"
+import { announcementsApi } from "@/lib/api"
 import AnnouncementForm from "@/components/admin/AnnouncementForm"
 import { Button } from "@/components/ui/button"
 import { Plus, Pencil, Trash2 } from "lucide-react"
 import { formatDate } from "@/lib/utils"
 
 export default function AdminAnnouncements() {
-  const { getToken } = useAuth()
   const [items,    setItems]    = useState([])
   const [loading,  setLoading]  = useState(true)
   const [formOpen, setFormOpen] = useState(false)
   const [editing,  setEditing]  = useState(null)
 
-  const load = async () => {
-    const token = await getToken()
-    setAuthToken(token)
-    const res = await announcementsApi.getAll()
-    setItems(res.data)
-  }
+  const load = () =>
+    announcementsApi.getAll()
+      .then(res => setItems(res.data))
+      .catch(() => {})
 
-  useEffect(() => { load().catch(() => {}).finally(() => setLoading(false)) }, [])
+  useEffect(() => { load().finally(() => setLoading(false)) }, [])
 
   const handleSave = async (data) => {
-    const token = await getToken()
-    setAuthToken(token)
-    editing ? await announcementsApi.update(editing.id, data) : await announcementsApi.create(data)
+    editing
+      ? await announcementsApi.update(editing.id, data)
+      : await announcementsApi.create(data)
     await load()
   }
 
   const handleRemove = async (id) => {
-    const token = await getToken()
-    setAuthToken(token)
     await announcementsApi.remove(id)
     await load()
   }

@@ -5,13 +5,20 @@ const api = axios.create({
   headers: { "Content-Type": "application/json" },
 })
 
-export function setAuthToken(token) {
-  if (token) {
-    api.defaults.headers.common["Authorization"] = `Bearer ${token}`
-  } else {
-    delete api.defaults.headers.common["Authorization"]
-  }
+// Called once from App.jsx after Clerk loads
+let _getToken = null
+
+export function initApiAuth(getToken) {
+  _getToken = getToken
 }
+
+api.interceptors.request.use(async (config) => {
+  if (_getToken) {
+    const token = await _getToken()
+    if (token) config.headers["Authorization"] = `Bearer ${token}`
+  }
+  return config
+})
 
 export const usersApi = {
   me:            ()         => api.get("/users/me"),
@@ -41,11 +48,11 @@ export const timeSlotsApi = {
 }
 
 export const bookingsApi = {
-  getAll:       ()                        => api.get("/bookings"),
-  getMine:      ()                        => api.get("/bookings/me"),
-  create:       (data)                    => api.post("/bookings", data),
-  updateStatus: (id, status, adminNotes)  => api.patch(`/bookings/${id}/status`, { status, admin_notes: adminNotes }),
-  cancel:       (id)                      => api.patch(`/bookings/${id}/status`, { status: "cancelled" }),
+  getAll:       ()                       => api.get("/bookings"),
+  getMine:      ()                       => api.get("/bookings/me"),
+  create:       (data)                   => api.post("/bookings", data),
+  updateStatus: (id, status, adminNotes) => api.patch(`/bookings/${id}/status`, { status, admin_notes: adminNotes }),
+  cancel:       (id)                     => api.patch(`/bookings/${id}/status`, { status: "cancelled" }),
 }
 
 export const announcementsApi = {

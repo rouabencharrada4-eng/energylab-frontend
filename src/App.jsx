@@ -20,6 +20,9 @@ import AdminAnnouncements from "@/pages/admin/Announcements"
 import CustomerDashboard from "@/pages/customer/Dashboard"
 import BookingNew        from "@/pages/customer/BookingNew"
 
+import { initApiAuth } from "@/lib/api"
+import { useAuth } from "@clerk/clerk-react"
+
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 
 function AdminLayout({ children }) {
@@ -31,9 +34,16 @@ function AdminLayout({ children }) {
   )
 }
 
+function ApiAuthInit() {
+  const { getToken } = useAuth()
+  initApiAuth(getToken)
+  return null
+}
+
 export default function App() {
   return (
     <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+      <ApiAuthInit />
       <BrowserRouter>
         <AnnouncementBanner />
         <Navbar />

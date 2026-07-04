@@ -1,5 +1,5 @@
 import { useBookings } from "@/hooks/useBookings"
-import { useUser, useAuth } from "@clerk/clerk-react"
+import { useUser, useClerk } from "@clerk/clerk-react"
 import { useNavigate, Link } from "react-router-dom"
 import BookingCard from "@/components/customer/BookingCard"
 import { Button } from "@/components/ui/button"
@@ -7,20 +7,18 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
   AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Plus } from "lucide-react"
-import { usersApi, setAuthToken } from "@/lib/api"
+import { usersApi } from "@/lib/api"
 
 export default function CustomerDashboard() {
-  const { user }              = useUser()
-  const { getToken, signOut } = useAuth()
+  const { user }                     = useUser()
+  const { signOut }                  = useClerk()
   const { bookings, loading, cancelBooking } = useBookings(false)
-  const navigate              = useNavigate()
+  const navigate                     = useNavigate()
 
   const active = bookings.filter(b => b.status !== "cancelled" && b.status !== "rejected")
   const past   = bookings.filter(b => b.status === "cancelled"  || b.status === "rejected")
 
   const handleDeleteAccount = async () => {
-    const token = await getToken()
-    setAuthToken(token)
     await usersApi.deleteAccount()
     await signOut()
     navigate("/")

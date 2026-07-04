@@ -1,16 +1,12 @@
 import { useEffect, useState } from "react"
-import { useAuth } from "@clerk/clerk-react"
-import { bookingsApi, usersApi, setAuthToken } from "@/lib/api"
+import { bookingsApi, usersApi } from "@/lib/api"
 import { Calendar, Users, Clock, CheckCircle } from "lucide-react"
 
 export default function AdminDashboard() {
-  const { getToken } = useAuth()
   const [stats, setStats] = useState({ pending: 0, accepted: 0, today: 0, customers: 0 })
 
   useEffect(() => {
     const load = async () => {
-      const token = await getToken()
-      setAuthToken(token)
       const [bRes, uRes] = await Promise.all([bookingsApi.getAll(), usersApi.getAll()])
       const bookings = bRes.data
       const today    = new Date().toISOString().split("T")[0]
@@ -22,13 +18,13 @@ export default function AdminDashboard() {
       })
     }
     load().catch(() => {})
-  }, [getToken])
+  }, [])
 
   const cards = [
-    { label: "Pending Requests",  value: stats.pending,   icon: Clock,        color: "text-yellow-400" },
-    { label: "Accepted Bookings", value: stats.accepted,  icon: CheckCircle,  color: "text-green-400"  },
-    { label: "Sessions Today",    value: stats.today,     icon: Calendar,     color: "text-primary"    },
-    { label: "Total Customers",   value: stats.customers, icon: Users,        color: "text-accent"     },
+    { label: "Pending Requests",  value: stats.pending,   icon: Clock,       color: "text-yellow-400" },
+    { label: "Accepted Bookings", value: stats.accepted,  icon: CheckCircle, color: "text-green-400"  },
+    { label: "Sessions Today",    value: stats.today,     icon: Calendar,    color: "text-primary"    },
+    { label: "Total Customers",   value: stats.customers, icon: Users,       color: "text-accent"     },
   ]
 
   return (
