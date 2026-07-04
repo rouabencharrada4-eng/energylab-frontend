@@ -14,8 +14,17 @@ export function initApiAuth(getToken) {
 
 api.interceptors.request.use(async (config) => {
   if (_getToken) {
-    const token = await _getToken()
-    if (token) config.headers["Authorization"] = `Bearer ${token}`
+    try {
+      // skipCache: true forces Clerk to fetch a fresh token
+      const token = await _getToken({ skipCache: true })
+      if (token) {
+        config.headers["Authorization"] = `Bearer ${token}`
+      } else {
+        console.warn("[API] getToken returned null — not signed in?")
+      }
+    } catch (e) {
+      console.error("[API] getToken threw:", e)
+    }
   }
   return config
 })
