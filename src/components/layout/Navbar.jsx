@@ -1,17 +1,31 @@
-import { Link, useLocation } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import { useUser, UserButton, SignInButton } from "@clerk/clerk-react"
 import { Button } from "@/components/ui/button"
 
-const publicLinks = [
-  { to: "/",        label: "Home"     },
-  { to: "/services", label: "Services" },
-  { to: "/contact", label: "Contact"  },
+const sectionLinks = [
+  { hash: "#home",     label: "Home"     },
+  { hash: "#services", label: "Services" },
+  { hash: "#contact",  label: "Contact"  },
 ]
 
 export default function Navbar() {
   const { isSignedIn, user } = useUser()
   const location = useLocation()
+  const navigate = useNavigate()
   const isAdmin = user?.publicMetadata?.role === "admin"
+
+  const goToSection = (e, hash) => {
+    e.preventDefault()
+    if (location.pathname === "/") {
+      if (hash === "#home") {
+        window.scrollTo({ top: 0, behavior: "smooth" })
+      } else {
+        document.querySelector(hash)?.scrollIntoView({ behavior: "smooth" })
+      }
+    } else {
+      navigate(`/${hash}`)
+    }
+  }
 
   return (
     <header className="fixed top-0 inset-x-0 z-50 border-b border-border/60 bg-background/90 backdrop-blur-sm">
@@ -23,18 +37,15 @@ export default function Navbar() {
         </Link>
 
         <nav className="hidden md:flex items-center gap-8">
-          {publicLinks.map(({ to, label }) => (
-            <Link
-              key={to}
-              to={to}
-              className={`text-sm tracking-wide transition-colors ${
-                location.pathname === to
-                  ? "text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
+          {sectionLinks.map(({ hash, label }) => (
+            <a
+              key={hash}
+              href={`/${hash}`}
+              onClick={(e) => goToSection(e, hash)}
+              className="text-sm tracking-wide text-muted-foreground hover:text-foreground transition-colors"
             >
               {label}
-            </Link>
+            </a>
           ))}
           {isSignedIn && (
             <Link

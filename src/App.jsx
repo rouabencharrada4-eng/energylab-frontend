@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom"
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { ClerkProvider } from "@clerk/clerk-react"
 
 import Navbar              from "@/components/layout/Navbar"
@@ -7,9 +7,7 @@ import Sidebar             from "@/components/layout/Sidebar"
 import AnnouncementBanner  from "@/components/common/AnnouncementBanner"
 import { ProtectedRoute }  from "@/components/common/ProtectedRoute"
 
-import Home         from "@/pages/public/Home"
-import Services     from "@/pages/public/Services"
-import Contact      from "@/pages/public/Contact"
+import Home from "@/pages/public/Home"
 
 import AdminDashboard     from "@/pages/admin/Dashboard"
 import AdminBookings      from "@/pages/admin/Bookings"
@@ -49,10 +47,10 @@ export default function App() {
         <Navbar />
 
         <Routes>
-          {/* Public */}
-          <Route path="/"         element={<Home />}     />
-          <Route path="/services" element={<Services />} />
-          <Route path="/contact"  element={<Contact />}  />
+          {/* Public — the vitrine is a single page now */}
+          <Route path="/"         element={<Home />} />
+          <Route path="/services" element={<Navigate to="/#services" replace />} />
+          <Route path="/contact"  element={<Navigate to="/#contact"  replace />} />
 
           {/* Customer */}
           <Route path="/dashboard" element={<ProtectedRoute><CustomerDashboard /></ProtectedRoute>} />
