@@ -7,7 +7,7 @@ import { useServices, useCoaches, useTimeSlots } from "@/hooks/useServices"
 import { formatDate, formatTime } from "@/lib/utils"
 
 export default function BookingForm({ onSubmit, loading }) {
-  const { services }  = useServices()
+  const { services, loading: servicesLoading, error: servicesError }  = useServices()
   const { coaches }   = useCoaches()
   const [serviceId, setServiceId] = useState("")
   const [coachId,   setCoachId]   = useState("")
@@ -28,14 +28,24 @@ export default function BookingForm({ onSubmit, loading }) {
     <div className="space-y-5">
       <div className="space-y-1.5">
         <Label>Service</Label>
-        <Select value={serviceId} onValueChange={setServiceId}>
-          <SelectTrigger><SelectValue placeholder="Select a service" /></SelectTrigger>
+        <Select value={serviceId} onValueChange={setServiceId} disabled={servicesLoading}>
+          <SelectTrigger>
+            <SelectValue placeholder={servicesLoading ? "Loading services..." : "Select a service"} />
+          </SelectTrigger>
           <SelectContent>
             {services.filter(s => s.is_active).map(s => (
               <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>
+        {servicesError && (
+          <p className="text-sm text-destructive">
+            Couldn't load services: {servicesError}
+          </p>
+        )}
+        {!servicesLoading && !servicesError && services.length === 0 && (
+          <p className="text-sm text-muted-foreground">No services available right now.</p>
+        )}
       </div>
 
       {selectedService?.requires_coach && (
