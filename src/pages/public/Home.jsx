@@ -136,18 +136,29 @@ export default function Home() {
         id="hero"
         className="relative min-h-[90vh] flex items-center justify-center overflow-hidden"
       >
-        <img
-          src="/assets/hero-bg.jpg"
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover opacity-25"
-        />
+        <div className="absolute inset-0">
+          <img
+            src="/assets/hero-bg.jpg"
+            alt=""
+            className="h-full w-full object-cover opacity-70"
+          />
+          {/* light burgundy wash — tints the photo without hiding it */}
+          <div className="absolute inset-0 bg-gradient-to-b from-background/10 via-primary/15 to-background/90" />
+          {/* gentle edge vignette only — center stays clear so the photo reads */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_55%,hsl(var(--background)/0.85)_100%)]" />
+        </div>
+
         <div className="relative z-10 text-center max-w-3xl mx-auto px-6 space-y-8">
-          <img src="/assets/logo-mark.png" alt="EnergyLab" className="h-16 w-auto mx-auto" />
-          <h1 className="text-6xl md:text-8xl font-display font-semibold tracking-tight leading-none uppercase">
+          <img
+            src="/assets/logo-mark.png"
+            alt="EnergyLab"
+            className="h-16 w-auto mx-auto invert drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)]"
+          />
+          <h1 className="text-6xl md:text-8xl font-display font-semibold tracking-tight leading-none uppercase drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]">
             Energy<br />
             <span className="text-primary">Lab</span>
           </h1>
-          <p className="text-muted-foreground tracking-widest uppercase text-xs">
+          <p className="text-accent tracking-widest uppercase text-xs drop-shadow-[0_1px_6px_rgba(0,0,0,0.6)]">
             Fitness · Wellness · Pilates
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
@@ -162,7 +173,7 @@ export default function Home() {
                 </Button>
               </SignInButton>
             )}
-            <Button asChild size="lg" variant="outline">
+            <Button asChild size="lg" variant="outline" className="bg-background/60 backdrop-blur-sm">
               <a href="#services">Our Services</a>
             </Button>
           </div>

@@ -40,9 +40,12 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
 
         <Link to="/" className="flex items-center gap-3">
-          <img src="/assets/logo-mark.png" alt="Energy Lab" className="h-8 w-auto" />
+          {/* invert flips the black mark to white so it's actually
+              visible against the dark navbar */}
+          <img src="/assets/logo-mark.png" alt="Energy Lab" className="h-8 w-auto invert" />
           <span className="hidden sm:block text-lg font-display font-semibold tracking-wide">
-            Energy Lab
+            <span className="text-foreground">Energy</span>{" "}
+            <span className="text-primary">Lab</span>
           </span>
         </Link>
 
@@ -52,13 +55,13 @@ export default function Navbar() {
               key={hash}
               hash={hash}
               label={label}
-              className="text-sm tracking-wide text-muted-foreground hover:text-foreground transition-colors"
+              className="text-sm tracking-wide text-muted-foreground hover:text-accent transition-colors"
             />
           ))}
           {isSignedIn && (
             <Link
               to={isAdmin ? "/admin" : "/dashboard"}
-              className="text-sm tracking-wide text-muted-foreground hover:text-foreground transition-colors"
+              className="text-sm tracking-wide text-muted-foreground hover:text-accent transition-colors"
             >
               {isAdmin ? "Admin" : "My Bookings"}
             </Link>
