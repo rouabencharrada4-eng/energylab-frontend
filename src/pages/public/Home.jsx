@@ -1,77 +1,116 @@
 import { useEffect, useRef, useState } from "react"
-import { Link, useLocation } from "react-router-dom"
-import { Button } from "@/components/ui/button"
+import { useLocation, Link } from "react-router-dom"
 import { SignInButton, useUser } from "@clerk/clerk-react"
+import { Button } from "@/components/ui/button"
 import { Mail, MapPin, Phone } from "lucide-react"
-import { servicesApi } from "@/lib/api"
 import ScrollFilament from "@/components/common/ScrollFilament"
 
-// Shown until /services returns real data — keeps the page looking
-// finished on first load, or if the API isn't reachable yet.
-const FALLBACK_SERVICES = [
+const showcase = [
   {
-    id: "fallback-1",
-    isDemo: true,
+    id: "coaching",
     name: "Private Coaching",
-    description: "One-on-one sessions tailored to your goals — strength, conditioning, or a mix, at your pace.",
-    image: "/assets/card_3.png",
-  },
-  {
-    id: "fallback-2",
-    isDemo: true,
-    name: "Pilates",
-    description: "Mat and reformer sessions focused on core strength, flexibility, and controlled movement.",
     image: "/assets/card_1.png",
+    tagline: "One-on-one, built around you",
+    description:
+      "Strength, conditioning, or a mix of both — a dedicated coach designs every session around your goals and pace.",
+    align: "left",
   },
   {
-    id: "fallback-3",
-    isDemo: true,
+    id: "inbody",
     name: "Inbody Analysis",
-    description: "Precise body composition analysis to track your progress beyond the scale.",
+    image: "/assets/card_3.png",
+    tagline: "Know your numbers",
+    description:
+      "Precise body composition scans that track real progress — muscle, fat, water — far beyond what a scale can tell you.",
+    align: "right",
+  },
+  {
+    id: "pilates",
+    name: "Pilates",
     image: "/assets/card_2.png",
+    tagline: "Control, core, calm",
+    description:
+      "Mat and reformer sessions focused on controlled movement, flexibility, and a stronger core.",
+    align: "left",
   },
 ]
 
-// If your admin-managed order doesn't match card_1/2/3.png, just
-// reorder this array — nothing else depends on it.
-const CARD_IMAGES = ["/assets/card_1.png", "/assets/card_2.png", "/assets/card_3.png"]
+// Placeholder gallery — swap these for real studio photos whenever they're ready.
+// Each entry just needs a src and a short caption.
+const gallery = [
+  { src: "/assets/hero-bg.jpg", caption: "The studio floor" },
+  { src: "/assets/card_2.png",  caption: "Reformer room" },
+  { src: "/assets/card_3.png",  caption: "Equipment & mats" },
+  { src: "/assets/card_1.png",  caption: "Private coaching space" },
+]
 
-// A single symmetric "S" wave through three points — top-left,
-// mid-right, bottom-left — built from two mirrored bezier halves
-// with matching vertical tangents at each point, so the curve
-// stays perfectly smooth and even top to bottom.
-const FILAMENT_PATH = "M 60 0 C 60 300, 340 300, 340 600 C 340 900, 60 900, 60 1200"
-
-const ALIGN = ["justify-start", "justify-end", "justify-start"]
-
-function Reveal({ children, className = "" }) {
+function useReveal() {
   const ref = useRef(null)
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const io = new IntersectionObserver(
+    const node = ref.current
+    if (!node) return
+    const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           setVisible(true)
-          io.disconnect()
+          observer.disconnect()
         }
       },
       { threshold: 0.2 }
     )
-    io.observe(el)
-    return () => io.disconnect()
+    observer.observe(node)
+    return () => observer.disconnect()
   }, [])
+
+  return [ref, visible]
+}
+
+function ShowcaseCard({ item }) {
+  const [ref, visible] = useReveal()
+  const isRight = item.align === "right"
 
   return (
     <div
       ref={ref}
-      className={`transition-all duration-700 ease-out ${
-        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-      } ${className}`}
+      className={`flex flex-col md:flex-row items-center gap-8 md:gap-10 md:w-[85%] transition-all duration-700 ease-out ${
+        isRight ? "md:flex-row-reverse md:ml-auto" : "md:mr-auto"
+      } ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
     >
-      {children}
+      <img
+        src={item.image}
+        alt={item.name}
+        className="w-48 md:w-56 rounded-xl border border-border/60 shadow-lg object-cover aspect-[2/3] shrink-0"
+      />
+      <div className={`space-y-3 ${isRight ? "md:text-right" : "text-left"}`}>
+        <p className="text-xs uppercase tracking-widest text-accent">{item.tagline}</p>
+        <h3 className="text-2xl font-display font-semibold">{item.name}</h3>
+        <p className={`text-sm text-muted-foreground leading-relaxed max-w-xs ${isRight ? "md:ml-auto" : ""}`}>
+          {item.description}
+        </p>
+      </div>
+    </div>
+  )
+}
+
+function GalleryTile({ src, caption }) {
+  const [ref, visible] = useReveal()
+  return (
+    <div
+      ref={ref}
+      className={`group relative overflow-hidden rounded-xl border border-border/60 aspect-[4/5] transition-all duration-700 ease-out ${
+        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+      }`}
+    >
+      <img
+        src={src}
+        alt={caption}
+        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+      />
+      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+        <p className="text-xs uppercase tracking-widest text-white">{caption}</p>
+      </div>
     </div>
   )
 }
@@ -79,36 +118,24 @@ function Reveal({ children, className = "" }) {
 export default function Home() {
   const { isSignedIn } = useUser()
   const location = useLocation()
-  const [services, setServices] = useState(FALLBACK_SERVICES)
 
-  useEffect(() => {
-    servicesApi
-      .getAll()
-      .then((res) => {
-        const active = (res.data || []).filter((s) => s.is_active)
-        if (active.length) {
-          setServices(
-            active.slice(0, 3).map((s, i) => ({ ...s, image: CARD_IMAGES[i % CARD_IMAGES.length] }))
-          )
-        }
-      })
-      .catch(() => {
-        // Fallback content above covers this.
-      })
-  }, [])
-
-  // Smooth-scroll to a section when arriving via a #hash — from the
-  // navbar, or redirected in from the old /services or /contact URLs.
+  // Coming from another page via a "/#hash" link — scroll once mounted.
   useEffect(() => {
     if (!location.hash) return
     const el = document.querySelector(location.hash)
-    if (el) requestAnimationFrame(() => el.scrollIntoView({ behavior: "smooth" }))
-  }, [location])
+    if (el) {
+      const t = setTimeout(() => el.scrollIntoView({ behavior: "smooth" }), 60)
+      return () => clearTimeout(t)
+    }
+  }, [location.hash])
 
   return (
     <main>
-      {/* ───────────────────────── Hero ───────────────────────── */}
-      <section id="home" className="relative min-h-[90vh] flex items-center justify-center overflow-hidden scroll-mt-16">
+      {/* Hero */}
+      <section
+        id="hero"
+        className="relative min-h-[90vh] flex items-center justify-center overflow-hidden"
+      >
         <img
           src="/assets/hero-bg.jpg"
           alt=""
@@ -135,66 +162,62 @@ export default function Home() {
                 </Button>
               </SignInButton>
             )}
-            <a href="#services">
-              <Button size="lg" variant="outline">Our Services</Button>
-            </a>
+            <Button asChild size="lg" variant="outline">
+              <a href="#services">Our Services</a>
+            </Button>
           </div>
         </div>
       </section>
 
-      {/* ───────────────────── Services + filament ───────────────────── */}
-      <section id="services" className="relative max-w-6xl mx-auto px-6 py-28 scroll-mt-16">
-        <Reveal className="mb-20 text-center">
-          <h2 className="text-3xl md:text-4xl font-display font-semibold">What We Offer</h2>
-          <p className="text-muted-foreground text-sm mt-3">Three ways to work with us — pick your path.</p>
-        </Reveal>
+      {/* About */}
+      <section id="about" className="max-w-3xl mx-auto px-6 py-24 text-center space-y-6 scroll-mt-16">
+        <p className="text-xs uppercase tracking-widest text-accent">Who we are</p>
+        <h2 className="text-3xl md:text-4xl font-display font-semibold">About Energy Lab</h2>
+        <p className="text-muted-foreground leading-relaxed">
+          Energy Lab is a Pilates and wellness studio built around one idea: movement should make
+          you feel better, not just tired. Every session is paced around the breath — slow, controlled,
+          intentional — so strength builds without strain on the body.
+        </p>
+        <p className="text-muted-foreground leading-relaxed">
+          Whether you're here for private coaching, a Pilates class, or an Inbody check-in, our space
+          is designed to be calm, uncluttered, and welcoming — good for the body, and just as good for
+          the mind.
+        </p>
+      </section>
 
-        <div className="relative h-[1700px] sm:h-[1900px] md:h-[2000px]">
-          <ScrollFilament d={FILAMENT_PATH} strokeWidth={4} />
+      {/* Our Space — gallery */}
+      <section id="space" className="max-w-6xl mx-auto px-6 py-24 scroll-mt-16">
+        <div className="text-center space-y-3 mb-14">
+          <p className="text-xs uppercase tracking-widest text-accent">Take a look inside</p>
+          <h2 className="text-3xl md:text-4xl font-display font-semibold">Our Space</h2>
+          <p className="text-muted-foreground text-sm max-w-md mx-auto">
+            A quiet, modern studio designed for focus — here's a glimpse before you visit.
+          </p>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
+          {gallery.map((g) => (
+            <GalleryTile key={g.src + g.caption} src={g.src} caption={g.caption} />
+          ))}
+        </div>
+      </section>
 
-          <div className="relative h-full flex flex-col justify-between">
-            {services.map((s, i) => {
-              const alignEnd = ALIGN[i % ALIGN.length] === "justify-end"
-              return (
-                <div key={s.id ?? s.name} className={`flex ${ALIGN[i % ALIGN.length]}`}>
-                  <Reveal
-                    className={`flex flex-col ${alignEnd ? "lg:flex-row-reverse" : "lg:flex-row"} items-center gap-8 lg:gap-10 w-full lg:w-auto max-w-lg text-center ${
-                      alignEnd ? "lg:text-right" : "lg:text-left"
-                    }`}
-                  >
-                    {/* Framed image */}
-                    <div className="relative shrink-0 w-64 h-80 sm:w-72 sm:h-[26rem] md:w-80 md:h-[30rem]">
-                      <div
-                        className="absolute -inset-3 rounded-[1.75rem] border border-border/60"
-                        aria-hidden="true"
-                      />
-                      <div className="relative h-full w-full overflow-hidden rounded-2xl border border-border/70 bg-card shadow-2xl shadow-black/40">
-                        <img src={s.image} alt={s.name} className="h-full w-full object-cover" />
-                      </div>
-                    </div>
+      {/* Services — staggered cards + scroll filament */}
+      <section id="services" className="relative max-w-4xl mx-auto px-6 py-28 scroll-mt-16">
+        <h2 className="text-3xl md:text-4xl font-display font-semibold mb-20 text-center">
+          What We Offer
+        </h2>
 
-                    <div className="space-y-3 px-2">
-                      <h3 className="text-2xl md:text-3xl font-display font-semibold">{s.name}</h3>
-                      {s.description && (
-                        <p className="text-sm md:text-base text-muted-foreground leading-relaxed max-w-[30ch] mx-auto lg:mx-0">
-                          {s.description}
-                        </p>
-                      )}
-                      {isSignedIn && !s.isDemo && (
-                        <Button asChild size="sm" variant="outline" className="mt-2">
-                          <Link to="/book">Book this</Link>
-                        </Button>
-                      )}
-                    </div>
-                  </Reveal>
-                </div>
-              )
-            })}
+        <div className="relative">
+          <ScrollFilament className="hidden md:block" />
+          <div className="relative z-10 flex flex-col gap-20 md:gap-28">
+            {showcase.map((item) => (
+              <ShowcaseCard key={item.id} item={item} />
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ───────────────────────── CTA band ───────────────────────── */}
+      {/* CTA band */}
       <section className="bg-primary/10 border-y border-primary/20 py-16 px-6 text-center space-y-6">
         <p className="text-2xl font-display font-semibold">Ready to start your journey?</p>
         {isSignedIn ? (
@@ -210,26 +233,24 @@ export default function Home() {
         )}
       </section>
 
-      {/* ───────────────────────── Contact ───────────────────────── */}
+      {/* Contact */}
       <section id="contact" className="max-w-3xl mx-auto px-6 py-24 space-y-12 scroll-mt-16">
-        <Reveal className="text-center space-y-3">
+        <div className="text-center space-y-3">
           <h2 className="text-3xl md:text-4xl font-display font-semibold">Get in Touch</h2>
           <p className="text-muted-foreground text-sm">We'd love to hear from you.</p>
-        </Reveal>
+        </div>
 
         <div className="grid sm:grid-cols-3 gap-6">
           {[
             { icon: MapPin, label: "Location", value: "123 Energy Street\nTunis, Tunisia" },
-            { icon: Phone, label: "Phone", value: "+216 XX XXX XXX" },
-            { icon: Mail, label: "Email", value: "hello@energylab.tn" },
+            { icon: Phone,  label: "Phone",    value: "+216 XX XXX XXX" },
+            { icon: Mail,   label: "Email",    value: "hello@energylab.tn" },
           ].map(({ icon: Icon, label, value }) => (
-            <Reveal key={label}>
-              <div className="rounded-lg border border-border/60 bg-card p-6 flex flex-col items-center gap-3 text-center h-full">
-                <Icon size={22} className="text-primary" />
-                <p className="text-sm font-medium">{label}</p>
-                <p className="text-xs text-muted-foreground whitespace-pre-line">{value}</p>
-              </div>
-            </Reveal>
+            <div key={label} className="rounded-lg border border-border/60 bg-card p-6 flex flex-col items-center gap-3 text-center">
+              <Icon size={22} className="text-primary" />
+              <p className="text-sm font-medium">{label}</p>
+              <p className="text-xs text-muted-foreground whitespace-pre-line">{value}</p>
+            </div>
           ))}
         </div>
       </section>

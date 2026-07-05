@@ -47,16 +47,18 @@ export default function App() {
         <Navbar />
 
         <Routes>
-          {/* Public — the vitrine is a single page now */}
-          <Route path="/"         element={<Home />} />
+          {/* Public — single-page vitrine, everything lives on "/" as sections */}
+          <Route path="/" element={<Home />} />
+
+          {/* Old bookmarks/links still resolve — they just land on the section */}
           <Route path="/services" element={<Navigate to="/#services" replace />} />
           <Route path="/contact"  element={<Navigate to="/#contact"  replace />} />
 
-          {/* Customer */}
+          {/* Customer — its own page, outside the vitrine */}
           <Route path="/dashboard" element={<ProtectedRoute><CustomerDashboard /></ProtectedRoute>} />
           <Route path="/book"      element={<ProtectedRoute><BookingNew /></ProtectedRoute>}        />
 
-          {/* Admin */}
+          {/* Admin — its own page, outside the vitrine */}
           <Route path="/admin" element={
             <ProtectedRoute requireAdmin><AdminLayout><AdminDashboard /></AdminLayout></ProtectedRoute>
           } />

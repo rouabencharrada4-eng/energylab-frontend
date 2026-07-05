@@ -1,13 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&display=swap');
 @import "tailwindcss";
-@import "tw-animate-css";
 
 /*
  * ─────────────────────────────────────────────────
  *  ENERGYLAB — Design Tokens
- *  To retheme: edit the raw palette + override block below.
- *  The @theme block is what registers these as real Tailwind
- *  utilities (bg-primary, border-border, rounded-lg, font-display...)
- *  — don't remove it, that's the piece that was missing before.
+ *  To retheme: edit the raw palette block only.
+ *  Everything below wires automatically.
  * ─────────────────────────────────────────────────
  */
 
@@ -19,7 +17,10 @@
     --el-pearl:      35 58% 75%;   /* AF8816 — Pearl Orchid   #E8C99A */
     --el-roble:      20 33% 27%;   /* 3769   — European Roble #5C3D2E */
     --el-off-white:   0  0% 96%;   /*           Near-white    #F5F5F5 */
-    --el-filament:   35 58% 75%;   /* on-scroll line — swap independently of --accent */
+
+    /* Independent token for the scroll filament — change this alone to
+       recolor the line without touching --accent used elsewhere. */
+    --filament:      35 58% 75%;
 
     /* ── Shadcn Variable Overrides ────────────── */
     --background:        0  0% 11%;
@@ -27,9 +28,6 @@
 
     --card:              0  0% 14%;
     --card-foreground:   0  0% 96%;
-
-    --popover:           0  0% 14%;
-    --popover-foreground: 0 0% 96%;
 
     --primary:          11 62% 32%;
     --primary-foreground: 0 0% 96%;
@@ -54,45 +52,7 @@
   }
 }
 
-/* This block is the fix: it maps the raw tokens above into the
-   --color-* / --radius-* / --font-* namespace Tailwind v4 scans
-   to generate utility classes. */
-@theme inline {
-  --color-background:             hsl(var(--background));
-  --color-foreground:             hsl(var(--foreground));
-  --color-card:                   hsl(var(--card));
-  --color-card-foreground:        hsl(var(--card-foreground));
-  --color-popover:                hsl(var(--popover));
-  --color-popover-foreground:     hsl(var(--popover-foreground));
-  --color-primary:                hsl(var(--primary));
-  --color-primary-foreground:     hsl(var(--primary-foreground));
-  --color-secondary:              hsl(var(--secondary));
-  --color-secondary-foreground:   hsl(var(--secondary-foreground));
-  --color-muted:                  hsl(var(--muted));
-  --color-muted-foreground:       hsl(var(--muted-foreground));
-  --color-accent:                 hsl(var(--accent));
-  --color-accent-foreground:      hsl(var(--accent-foreground));
-  --color-destructive:            hsl(var(--destructive));
-  --color-destructive-foreground: hsl(var(--destructive-foreground));
-  --color-border:                 hsl(var(--border));
-  --color-input:                  hsl(var(--input));
-  --color-ring:                   hsl(var(--ring));
-
-  --radius-sm:  calc(var(--radius) * 0.6);
-  --radius-md:  calc(var(--radius) * 0.8);
-  --radius-lg:  var(--radius);
-  --radius-xl:  calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-
-  --font-display: 'Cormorant Garamond', Georgia, serif;
-  --font-sans:    'Inter', system-ui, -apple-system, sans-serif;
-}
-
 @layer base {
-  html {
-    scroll-behavior: smooth;
-  }
-
   * {
     border-color: hsl(var(--border));
   }
@@ -108,5 +68,14 @@
     font-family: 'Cormorant Garamond', Georgia, serif;
     font-weight: 600;
     letter-spacing: -0.01em;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  ::selection {
+    background-color: hsl(var(--el-burgundy));
+    color: hsl(var(--el-off-white));
   }
 }

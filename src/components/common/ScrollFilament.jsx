@@ -1,90 +1,104 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
 
 /**
  * ScrollFilament
+ * Draws a winding line down its parent container, then "grows" it in
+ * as that container scrolls through the viewport.
  *
- * A single line that "draws" itself in as the section scrolls through
- * the viewport — pure SVG + a scroll listener, no animation library.
+ * Drop it as the first child of a `relative` wrapper around your
+ * staggered content — it fills that wrapper (100% x 100%) and sits
+ * behind the content (keep the content at z-10 or higher).
  *
- * `d` is authored in the local viewBox coordinate space (see default
- * below). Color reads --el-filament from globals.css so it can be
- * swapped independently of --primary / --accent while you test palettes.
+ * The `d` path below is hand-tuned to weave: left → right → left across
+ * a 0–900 tall / 0–200 wide box. If you add/remove rows, stretch the
+ * viewBox height and add matching curve segments.
  */
-export default function ScrollFilament({ d, viewBox = "0 0 400 1200", strokeWidth = 3, className = "" }) {
+export default function ScrollFilament({ className = "", strokeWidth = 5 }) {
   const svgRef = useRef(null)
   const pathRef = useRef(null)
   const [length, setLength] = useState(0)
-  const [offset, setOffset] = useState(0)
 
-  useEffect(() => {
+  const d = `
+    M 40 0
+    C 40 150, 160 150, 160 300
+    C 160 450, 40 450, 40 600
+    C 40 750, 100 800, 100 900
+  `
+
+  // Measure before paint so we never flash a fully-solid line.
+  useLayoutEffect(() => {
     if (pathRef.current) {
-      const total = pathRef.current.getTotalLength()
-      setLength(total)
-      setOffset(total)
+      setLength(pathRef.current.getTotalLength())
     }
-  }, [d])
+  }, [])
 
   useEffect(() => {
-    let raf = null
+    if (!length) return
+    let ticking = false
 
-    const update = () => {
-      raf = null
-      const el = svgRef.current
-      if (!el || !length) return
+    function update() {
+      const svg = svgRef.current
+      if (!svg || !pathRef.current) return
+      const rect = svg.getBoundingClientRect()
+      const viewportH = window.innerHeight
 
-      const rect = el.getBoundingClientRect()
-      const vh = window.innerHeight
+      // Tied to the viewport's vertical center, so the fill point sits right
+      // where your eye is: 0 when the section's top reaches mid-screen,
+      // 1 when the section's bottom reaches mid-screen.
+      const progress = Math.min(Math.max((viewportH / 2 - rect.top) / rect.height, 0), 1)
 
-      // 0 as the section's top enters the viewport, 1 once its
-      // bottom has scrolled past the top of the viewport.
-      const progress = (vh - rect.top) / (rect.height + vh)
-      const clamped = Math.min(1, Math.max(0, progress))
-
-      setOffset(length * (1 - clamped))
+      pathRef.current.style.strokeDashoffset = String(length * (1 - progress))
+      ticking = false
     }
 
-    const onScroll = () => {
-      if (raf === null) raf = requestAnimationFrame(update)
+    function onScroll() {
+      if (!ticking) {
+        ticking = true
+        requestAnimationFrame(update)
+      }
     }
 
+    update()
     window.addEventListener("scroll", onScroll, { passive: true })
     window.addEventListener("resize", onScroll)
-    update()
-
     return () => {
       window.removeEventListener("scroll", onScroll)
       window.removeEventListener("resize", onScroll)
-      if (raf) cancelAnimationFrame(raf)
     }
   }, [length])
 
   return (
     <svg
       ref={svgRef}
-      viewBox={viewBox}
+      viewBox="0 0 200 900"
       preserveAspectRatio="none"
-      className={`absolute inset-0 h-full w-full ${className}`}
+      className={`pointer-events-none absolute inset-0 h-full w-full ${className}`}
       aria-hidden="true"
     >
-      {/* faint full track, always visible */}
+      {/* Always-visible track — shows the full path so the eye can anticipate
+          where the line goes before you've scrolled that far. */}
       <path
         d={d}
         fill="none"
-        stroke="hsl(var(--el-filament))"
-        strokeOpacity="0.15"
         strokeWidth={strokeWidth}
         strokeLinecap="round"
+        vectorEffect="non-scaling-stroke"
+        style={{ stroke: "hsl(var(--muted-foreground))", opacity: 0.5 }}
       />
-      {/* the segment that draws itself in as you scroll */}
+      {/* Gold fill — draws in over the track as you scroll, glued to scroll
+          position (no transition lag). */}
       <path
         ref={pathRef}
         d={d}
         fill="none"
-        stroke="hsl(var(--el-filament))"
         strokeWidth={strokeWidth}
         strokeLinecap="round"
-        strokeDasharray={length}
-        strokeDashoffset={offset}
+        vectorEffect="non-scaling-stroke"
+        style={{
+          stroke: "hsl(var(--filament))",
+          strokeDasharray: length,
+          strokeDashoffset: length,
+        }}
       />
     </svg>
   )

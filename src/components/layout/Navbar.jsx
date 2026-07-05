@@ -1,51 +1,59 @@
-import { Link, useLocation, useNavigate } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 import { useUser, UserButton, SignInButton } from "@clerk/clerk-react"
 import { Button } from "@/components/ui/button"
 
-const sectionLinks = [
-  { hash: "#home",     label: "Home"     },
-  { hash: "#services", label: "Services" },
-  { hash: "#contact",  label: "Contact"  },
+const publicLinks = [
+  { hash: "#hero",     label: "Home"      },
+  { hash: "#about",    label: "About"     },
+  { hash: "#space",    label: "Our Space" },
+  { hash: "#services", label: "Services"  },
+  { hash: "#contact",  label: "Contact"   },
 ]
+
+// On the homepage this is a plain in-page anchor (smooth-scrolled via CSS).
+// From any other page (e.g. /dashboard) it's a router Link back to "/",
+// and Home's own effect scrolls to the hash once it mounts.
+function NavAnchor({ hash, label, className }) {
+  const location = useLocation()
+  const onHome = location.pathname === "/"
+
+  if (onHome) {
+    return (
+      <a href={hash} className={className}>
+        {label}
+      </a>
+    )
+  }
+  return (
+    <Link to={`/${hash}`} className={className}>
+      {label}
+    </Link>
+  )
+}
 
 export default function Navbar() {
   const { isSignedIn, user } = useUser()
-  const location = useLocation()
-  const navigate = useNavigate()
   const isAdmin = user?.publicMetadata?.role === "admin"
-
-  const goToSection = (e, hash) => {
-    e.preventDefault()
-    if (location.pathname === "/") {
-      if (hash === "#home") {
-        window.scrollTo({ top: 0, behavior: "smooth" })
-      } else {
-        document.querySelector(hash)?.scrollIntoView({ behavior: "smooth" })
-      }
-    } else {
-      navigate(`/${hash}`)
-    }
-  }
 
   return (
     <header className="fixed top-0 inset-x-0 z-50 border-b border-border/60 bg-background/90 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
 
         <Link to="/" className="flex items-center gap-3">
-          <img src="/assets/logo-mark.png" alt="EnergyLab" className="h-8 w-auto" />
-          <img src="/assets/logo-wordmark.png" alt="Energy Lab" className="h-5 w-auto hidden sm:block" />
+          <img src="/assets/logo-mark.png" alt="Energy Lab" className="h-8 w-auto" />
+          <span className="hidden sm:block text-lg font-display font-semibold tracking-wide">
+            Energy Lab
+          </span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-8">
-          {sectionLinks.map(({ hash, label }) => (
-            <a
+        <nav className="hidden md:flex items-center gap-7">
+          {publicLinks.map(({ hash, label }) => (
+            <NavAnchor
               key={hash}
-              href={`/${hash}`}
-              onClick={(e) => goToSection(e, hash)}
+              hash={hash}
+              label={label}
               className="text-sm tracking-wide text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {label}
-            </a>
+            />
           ))}
           {isSignedIn && (
             <Link
