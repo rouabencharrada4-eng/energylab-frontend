@@ -51,6 +51,16 @@ const aboutParagraphs = [
   "At Energy Lab, wellness isn't just a workout—it's a way of living.",
 ]
 
+const contactInfo = [
+  { icon: MapPin, label: "Location", value: "Tunis, Lafayette 5020" },
+  { icon: Phone,  label: "Phone",    value: "55 555 555" },
+  { icon: Mail,   label: "Email",    value: "energylab-contact@gmail.com" },
+]
+
+// Swap this for the exact address (or a "lat,lng" pair, e.g. "36.8065,10.1815")
+// once the precise studio location is confirmed — the map below updates automatically.
+const MAP_QUERY = "Tunis, Lafayette 5020, Tunisia"
+
 function useReveal() {
   const ref = useRef(null)
   const [visible, setVisible] = useState(false)
@@ -295,39 +305,44 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      <section className="bg-primary/10 border-y border-primary/20 py-16 px-6 text-center space-y-6">
-        <p className="text-2xl font-display font-semibold">Ready to start your journey?</p>
-        {isSignedIn ? (
-          <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground">
-            <Link to="/book">Book Now</Link>
-          </Button>
-        ) : (
-          <SignInButton mode="modal">
-            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
-              Create an Account
-            </Button>
-          </SignInButton>
-        )}
-      </section>
-
-      <section id="contact" className="max-w-3xl mx-auto px-6 py-24 space-y-12 scroll-mt-16">
-        <div className="text-center space-y-3">
+      <section id="contact" className="max-w-6xl mx-auto px-6 py-24 scroll-mt-16">
+        <div className="text-center space-y-3 mb-14">
           <h2 className="text-3xl md:text-4xl font-display font-semibold">Get in Touch</h2>
           <p className="text-muted-foreground text-sm">We'd love to hear from you.</p>
         </div>
-        <div className="grid sm:grid-cols-3 gap-6">
-          {[
-            { icon: MapPin, label: "Location", value: "123 Energy Street\nTunis, Tunisia" },
-            { icon: Phone,  label: "Phone",    value: "+216 XX XXX XXX" },
-            { icon: Mail,   label: "Email",    value: "hello@energylab.tn" },
-          ].map(({ icon: Icon, label, value }) => (
-            <div key={label} className="rounded-lg border border-border/60 bg-card p-6 flex flex-col items-center gap-3 text-center">
-              <Icon size={22} className="text-primary" />
-              <p className="text-sm font-medium">{label}</p>
-              <p className="text-xs text-muted-foreground whitespace-pre-line">{value}</p>
-            </div>
-          ))}
+
+        <div className="grid lg:grid-cols-2 gap-8 items-stretch">
+          {/* Left — stacked contact details, framed like the photos elsewhere on the page */}
+          <div className="flex flex-col gap-5 justify-center">
+            {contactInfo.map(({ icon: Icon, label, value }) => (
+              <div
+                key={label}
+                className="rounded-2xl border-2 border-primary p-5 flex items-start gap-4"
+              >
+                <div className="shrink-0 h-10 w-10 rounded-full bg-primary/15 flex items-center justify-center">
+                  <Icon size={18} className="text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1">
+                    {label}
+                  </p>
+                  <p className="text-sm font-medium whitespace-pre-line">{value}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Right — map */}
+          <div className="rounded-xl border border-border/60 overflow-hidden min-h-[320px] lg:min-h-[400px]">
+            <iframe
+              title="Energy Lab location"
+              src={`https://www.google.com/maps?q=${encodeURIComponent(MAP_QUERY)}&output=embed`}
+              className="w-full h-full"
+              style={{ border: 0 }}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </div>
         </div>
       </section>
     </main>
