@@ -10,16 +10,14 @@ const showcase = [
     id: "coaching",
     name: "Private Coaching",
     image: "/assets/card_1.png",
-    tagline: "One-on-one, built around you",
     description:
       "Strength, conditioning, or a mix of both — a dedicated coach designs every session around your goals and pace.",
     align: "left",
   },
   {
     id: "inbody",
-    name: "Inbody Analysis",
+    name: "Inbody Machine Service",
     image: "/assets/card_3.png",
-    tagline: "Know your numbers",
     description:
       "Precise body composition scans that track real progress — muscle, fat, water — far beyond what a scale can tell you.",
     align: "right",
@@ -28,7 +26,6 @@ const showcase = [
     id: "pilates",
     name: "Pilates",
     image: "/assets/card_2.png",
-    tagline: "Control, core, calm",
     description:
       "Mat and reformer sessions focused on controlled movement, flexibility, and a stronger core.",
     align: "left",
@@ -79,6 +76,7 @@ function useReveal() {
 
 function ShowcaseCard({ item }) {
   const [ref, visible] = useReveal()
+  const { isSignedIn } = useUser()
   const isRight = item.align === "right"
 
   return (
@@ -88,17 +86,30 @@ function ShowcaseCard({ item }) {
         isRight ? "md:flex-row-reverse md:ml-auto" : "md:mr-auto"
       } ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
     >
-      <img
-        src={item.image}
-        alt={item.name}
-        className="w-48 md:w-56 rounded-xl border border-border/60 shadow-lg object-cover aspect-[2/3] shrink-0"
-      />
-      <div className={`space-y-3 ${isRight ? "md:text-right" : "text-left"}`}>
-        <p className="text-xs uppercase tracking-widest text-accent">{item.tagline}</p>
-        <h3 className="text-2xl font-display font-semibold">{item.name}</h3>
+      <div className="rounded-2xl border-2 border-primary p-3 shrink-0">
+        <img
+  src={item.image}
+  alt={item.name}
+  className="w-[320px] h-[440px] object-cover rounded-lg"
+/>
+      </div>
+
+      <div className={`space-y-4 ${isRight ? "md:text-right" : "text-left"}`}>
+        <h3 className="text-2xl font-display font-semibold text-accent">{item.name}</h3>
         <p className={`text-sm text-muted-foreground leading-relaxed max-w-xs ${isRight ? "md:ml-auto" : ""}`}>
           {item.description}
         </p>
+        {isSignedIn ? (
+          <Button asChild size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground">
+            <Link to="/book">Book Now</Link>
+          </Button>
+        ) : (
+          <SignInButton mode="modal">
+            <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground">
+              Book Now
+            </Button>
+          </SignInButton>
+        )}
       </div>
     </div>
   )
