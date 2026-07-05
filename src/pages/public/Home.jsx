@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { useLocation, Link } from "react-router-dom"
 import { SignInButton, useUser } from "@clerk/clerk-react"
 import { Button } from "@/components/ui/button"
-import { Mail, MapPin, Phone } from "lucide-react"
+import { Mail, MapPin, Phone, ChevronLeft, ChevronRight } from "lucide-react"
 import ScrollFilament from "@/components/common/ScrollFilament"
 
 const showcase = [
@@ -35,13 +35,27 @@ const showcase = [
   },
 ]
 
-// Placeholder gallery — swap these for real studio photos whenever they're ready.
-// Each entry just needs a src and a short caption.
+// Your real interior shots — captions are starter guesses based on
+// each photo, rename them to match what's actually in each one.
 const gallery = [
-  { src: "/assets/hero-bg.jpg", caption: "The studio floor" },
-  { src: "/assets/card_2.png",  caption: "Reformer room" },
-  { src: "/assets/card_3.png",  caption: "Equipment & mats" },
-  { src: "/assets/card_1.png",  caption: "Private coaching space" },
+  { src: "/assets/center_1.jpeg", caption: "The studio floor" },
+  { src: "/assets/center_2.jpeg", caption: "Reformer room" },
+  { src: "/assets/center_3.jpeg", caption: "Equipment wall" },
+  { src: "/assets/center_4.jpeg", caption: "Private coaching space" },
+  { src: "/assets/center_5.jpeg", caption: "Mat & stretch area" },
+  { src: "/assets/center_6.jpeg", caption: "Reception" },
+  { src: "/assets/center_7.jpeg", caption: "Studio detail" },
+  { src: "/assets/center_8.jpeg", caption: "Natural light corner" },
+  { src: "/assets/center_9.jpeg", caption: "Entrance" },
+]
+
+// About section copy — split into paragraphs so each renders as its
+// own <p> with normal paragraph spacing.
+const aboutParagraphs = [
+  "Welcome to Energy Lab—a space where movement, wellness, and mindfulness come together.",
+  "We believe true strength is built through intention, not intensity. Every Pilates session is thoughtfully designed around controlled movement and mindful breathing, helping you strengthen your body, improve mobility, and cultivate lasting balance.",
+  "From private coaching and group classes to InBody assessments, every experience is tailored to support your individual journey. Our studio offers a peaceful, modern environment where you can disconnect from the pace of everyday life and reconnect with yourself.",
+  "At Energy Lab, wellness isn't just a workout—it's a way of living.",
 ]
 
 function useReveal() {
@@ -95,14 +109,8 @@ function ShowcaseCard({ item }) {
 }
 
 function GalleryTile({ src, caption }) {
-  const [ref, visible] = useReveal()
   return (
-    <div
-      ref={ref}
-      className={`group relative overflow-hidden rounded-xl border border-border/60 aspect-[4/5] transition-all duration-700 ease-out ${
-        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
-      }`}
-    >
+    <div className="group relative shrink-0 snap-start overflow-hidden rounded-xl border border-border/60 aspect-[4/5] w-[70%] sm:w-[42%] md:w-[30%] lg:w-[23%]">
       <img
         src={src}
         alt={caption}
@@ -115,9 +123,61 @@ function GalleryTile({ src, caption }) {
   )
 }
 
+function SpaceCarousel() {
+  const [ref, visible] = useReveal()
+  const scrollerRef = useRef(null)
+
+  const scrollByAmount = (direction) => {
+    const el = scrollerRef.current
+    if (!el) return
+    el.scrollBy({ left: direction * el.clientWidth * 0.8, behavior: "smooth" })
+  }
+
+  return (
+    <div
+      ref={ref}
+      className={`relative transition-all duration-700 ease-out ${
+        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+      }`}
+    >
+      {/* edge fades — hint that the strip continues off-screen */}
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-10 md:w-16 bg-gradient-to-r from-background to-transparent z-10" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-10 md:w-16 bg-gradient-to-l from-background to-transparent z-10" />
+
+      <div
+        ref={scrollerRef}
+        className="no-scrollbar flex gap-4 md:gap-5 overflow-x-auto scroll-smooth snap-x snap-mandatory px-1 pb-2"
+      >
+        {gallery.map((g) => (
+          <GalleryTile key={g.src} src={g.src} caption={g.caption} />
+        ))}
+      </div>
+
+      {/* scroll buttons — convenience for mouse users, drag/swipe still works without them */}
+      <button
+        type="button"
+        onClick={() => scrollByAmount(-1)}
+        aria-label="Scroll left"
+        className="absolute left-1 md:left-2 top-1/2 -translate-y-1/2 z-20 h-10 w-10 rounded-full border border-border bg-background/80 backdrop-blur-sm flex items-center justify-center hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors"
+      >
+        <ChevronLeft size={18} />
+      </button>
+      <button
+        type="button"
+        onClick={() => scrollByAmount(1)}
+        aria-label="Scroll right"
+        className="absolute right-1 md:right-2 top-1/2 -translate-y-1/2 z-20 h-10 w-10 rounded-full border border-border bg-background/80 backdrop-blur-sm flex items-center justify-center hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors"
+      >
+        <ChevronRight size={18} />
+      </button>
+    </div>
+  )
+}
+
 export default function Home() {
   const { isSignedIn } = useUser()
   const location = useLocation()
+  const [aboutRef, aboutVisible] = useReveal()
 
   // Coming from another page via a "/#hash" link — scroll once mounted.
   useEffect(() => {
@@ -142,9 +202,7 @@ export default function Home() {
             alt=""
             className="h-full w-full object-cover opacity-70"
           />
-          {/* light burgundy wash — tints the photo without hiding it */}
           <div className="absolute inset-0 bg-gradient-to-b from-background/10 via-primary/15 to-background/90" />
-          {/* gentle edge vignette only — center stays clear so the photo reads */}
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_55%,hsl(var(--background)/0.85)_100%)]" />
         </div>
 
@@ -180,23 +238,36 @@ export default function Home() {
         </div>
       </section>
 
-      {/* About */}
-      <section id="about" className="max-w-3xl mx-auto px-6 py-24 text-center space-y-6 scroll-mt-16">
-        <p className="text-xs uppercase tracking-widest text-accent">Who we are</p>
-        <h2 className="text-3xl md:text-4xl font-display font-semibold">About Energy Lab</h2>
-        <p className="text-muted-foreground leading-relaxed">
-          Energy Lab is a Pilates and wellness studio built around one idea: movement should make
-          you feel better, not just tired. Every session is paced around the breath — slow, controlled,
-          intentional — so strength builds without strain on the body.
-        </p>
-        <p className="text-muted-foreground leading-relaxed">
-          Whether you're here for private coaching, a Pilates class, or an Inbody check-in, our space
-          is designed to be calm, uncluttered, and welcoming — good for the body, and just as good for
-          the mind.
-        </p>
+      {/* About — framed photo left, copy right */}
+      <section id="about" className="max-w-5xl mx-auto px-6 py-24 scroll-mt-16">
+        <div
+          ref={aboutRef}
+          className={`grid md:grid-cols-2 gap-10 md:gap-16 items-center transition-all duration-700 ease-out ${
+            aboutVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+          }`}
+        >
+          <div className="relative mx-auto md:mx-0 w-full max-w-sm">
+            <div className="rounded-2xl border-2 border-primary p-3">
+              <img
+                src="/assets/about_us.png"
+                alt="Inside Energy Lab"
+                className="w-full h-[420px] object-cover rounded-lg"
+              />
+            </div>
+          </div>
+
+          <div className="text-center md:text-left space-y-5">
+            <p className="text-xs uppercase tracking-widest text-accent">About Us</p>
+            {aboutParagraphs.map((paragraph, i) => (
+              <p key={i} className="text-muted-foreground leading-relaxed">
+                {paragraph}
+              </p>
+            ))}
+          </div>
+        </div>
       </section>
 
-      {/* Our Space — gallery */}
+      {/* Our Space — scrollable gallery */}
       <section id="space" className="max-w-6xl mx-auto px-6 py-24 scroll-mt-16">
         <div className="text-center space-y-3 mb-14">
           <p className="text-xs uppercase tracking-widest text-accent">Take a look inside</p>
@@ -205,11 +276,7 @@ export default function Home() {
             A quiet, modern studio designed for focus — here's a glimpse before you visit.
           </p>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
-          {gallery.map((g) => (
-            <GalleryTile key={g.src + g.caption} src={g.src} caption={g.caption} />
-          ))}
-        </div>
+        <SpaceCarousel />
       </section>
 
       {/* Services — staggered cards + scroll filament */}
