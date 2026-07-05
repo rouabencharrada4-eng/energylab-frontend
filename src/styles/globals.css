@@ -2,64 +2,39 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/*
- * ─────────────────────────────────────────────────
- *  ENERGYLAB — Design Tokens
- *  To retheme: edit the raw palette block only.
- *  The @theme block below is what registers these as real
- *  Tailwind utilities (bg-primary, rounded-lg, etc.) — this is
- *  the piece that was missing, so classes were silently no-ops.
- * ─────────────────────────────────────────────────
- */
-
 @layer base {
   :root {
-    /* ── Raw Palette ──────────────────────────── */
-    --el-burgundy:   11 62% 32%;   /* ST295  — Burgundy       #8B3520 */
-    --el-black:       0  0% 11%;   /* ST220  — Black          #1C1C1C */
-    --el-pearl:      35 58% 75%;   /* AF8816 — Pearl Orchid   #E8C99A */
-    --el-roble:      20 33% 27%;   /* 3769   — European Roble #5C3D2E */
-    --el-off-white:   0  0% 96%;   /*           Near-white    #F5F5F5 */
+    --el-burgundy:   11 62% 32%;
+    --el-black:       0  0% 11%;
+    --el-pearl:      35 58% 75%;
+    --el-roble:      20 33% 27%;
+    --el-off-white:   0  0% 96%;
 
-    /* Independent token for the scroll filament — change this alone to
-       recolor the line without touching --accent used elsewhere. */
     --filament:      35 58% 75%;
 
-    /* ── Shadcn Variable Overrides ────────────── */
     --background:        0  0% 11%;
     --foreground:        0  0% 96%;
-
     --card:              0  0% 14%;
     --card-foreground:   0  0% 96%;
-
     --popover:           0  0% 14%;
     --popover-foreground: 0 0% 96%;
-
     --primary:          11 62% 32%;
     --primary-foreground: 0 0% 96%;
-
     --secondary:        20 33% 27%;
     --secondary-foreground: 35 58% 75%;
-
     --muted:             0  0% 16%;
     --muted-foreground:  0  0% 55%;
-
     --accent:           35 58% 75%;
     --accent-foreground: 0  0% 11%;
-
     --destructive:       0 72% 51%;
     --destructive-foreground: 0 0% 96%;
-
     --border:            0  0% 20%;
     --input:             0  0% 18%;
     --ring:             11 62% 32%;
-
     --radius: 0.375rem;
   }
 }
 
-/* Registers the tokens above so bg-primary, text-primary-foreground,
-   border-border, rounded-lg/md, font-display etc. actually generate. */
 @theme inline {
   --color-background:             hsl(var(--background));
   --color-foreground:             hsl(var(--foreground));
@@ -108,13 +83,15 @@
     font-weight: 600;
     letter-spacing: -0.01em;
   }
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
   html {
     scroll-behavior: smooth;
   }
@@ -123,4 +100,15 @@
     background-color: hsl(var(--el-burgundy));
     color: hsl(var(--el-off-white));
   }
+}
+
+/* ── Gallery marquee animations ─────────────────── */
+@keyframes marquee-left {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@keyframes marquee-right {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0); }
 }

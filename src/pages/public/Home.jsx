@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { useLocation, Link } from "react-router-dom"
 import { SignInButton, useUser } from "@clerk/clerk-react"
 import { Button } from "@/components/ui/button"
-import { Mail, MapPin, Phone, ChevronLeft, ChevronRight } from "lucide-react"
+import { Mail, MapPin, Phone } from "lucide-react"
 import ScrollFilament from "@/components/common/ScrollFilament"
 
 const showcase = [
@@ -35,8 +35,6 @@ const showcase = [
   },
 ]
 
-// Your real interior shots — captions are starter guesses based on
-// each photo, rename them to match what's actually in each one.
 const gallery = [
   { src: "/assets/center_1.jpeg", caption: "The studio floor" },
   { src: "/assets/center_2.jpeg", caption: "Reformer room" },
@@ -49,8 +47,6 @@ const gallery = [
   { src: "/assets/center_9.jpeg", caption: "Entrance" },
 ]
 
-// About section copy — split into paragraphs so each renders as its
-// own <p> with normal paragraph spacing.
 const aboutParagraphs = [
   "Welcome to Energy Lab—a space where movement, wellness, and mindfulness come together.",
   "We believe true strength is built through intention, not intensity. Every Pilates session is thoughtfully designed around controlled movement and mindful breathing, helping you strengthen your body, improve mobility, and cultivate lasting balance.",
@@ -110,27 +106,27 @@ function ShowcaseCard({ item }) {
 
 function GalleryTile({ src, caption }) {
   return (
-    <div className="group relative shrink-0 snap-start overflow-hidden rounded-xl border border-border/60 aspect-[4/5] w-[70%] sm:w-[42%] md:w-[30%] lg:w-[23%]">
+    <div className="group relative shrink-0 overflow-hidden rounded-xl border border-border/60 w-[520px] h-[280px]">
       <img
         src={src}
         alt={caption}
         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
       />
-      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-        <p className="text-xs uppercase tracking-widest text-white">{caption}</p>
-      </div>
     </div>
   )
 }
 
 function SpaceCarousel() {
   const [ref, visible] = useReveal()
-  const scrollerRef = useRef(null)
 
-  const scrollByAmount = (direction) => {
-    const el = scrollerRef.current
-    if (!el) return
-    el.scrollBy({ left: direction * el.clientWidth * 0.8, behavior: "smooth" })
+  const row1 = [...gallery, ...gallery]
+  const row2 = [...[...gallery].reverse(), ...[...gallery].reverse()]
+
+  const pauseAnim = (e) => {
+    e.currentTarget.firstElementChild.style.animationPlayState = "paused"
+  }
+  const resumeAnim = (e) => {
+    e.currentTarget.firstElementChild.style.animationPlayState = "running"
   }
 
   return (
@@ -140,36 +136,36 @@ function SpaceCarousel() {
         visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
       }`}
     >
-      {/* edge fades — hint that the strip continues off-screen */}
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-10 md:w-16 bg-gradient-to-r from-background to-transparent z-10" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-10 md:w-16 bg-gradient-to-l from-background to-transparent z-10" />
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-20 md:w-32 bg-gradient-to-r from-background to-transparent z-10" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-20 md:w-32 bg-gradient-to-l from-background to-transparent z-10" />
 
-      <div
-        ref={scrollerRef}
-        className="no-scrollbar flex gap-4 md:gap-5 overflow-x-auto scroll-smooth snap-x snap-mandatory px-1 pb-2"
-      >
-        {gallery.map((g) => (
-          <GalleryTile key={g.src} src={g.src} caption={g.caption} />
-        ))}
+      <div className="overflow-hidden flex flex-col gap-4">
+        <div className="flex" onMouseEnter={pauseAnim} onMouseLeave={resumeAnim}>
+          <div
+            className="flex gap-[14px]"
+            style={{ animation: "marquee-left 32s linear infinite" }}
+          >
+            {row1.map((g, i) => (
+              <GalleryTile key={i} src={g.src} caption={g.caption} />
+            ))}
+          </div>
+        </div>
+
+        <div className="flex" onMouseEnter={pauseAnim} onMouseLeave={resumeAnim}>
+          <div
+            className="flex gap-[14px]"
+            style={{ animation: "marquee-right 32s linear infinite" }}
+          >
+            {row2.map((g, i) => (
+              <GalleryTile key={i} src={g.src} caption={g.caption} />
+            ))}
+          </div>
+        </div>
       </div>
 
-      {/* scroll buttons — convenience for mouse users, drag/swipe still works without them */}
-      <button
-        type="button"
-        onClick={() => scrollByAmount(-1)}
-        aria-label="Scroll left"
-        className="absolute left-1 md:left-2 top-1/2 -translate-y-1/2 z-20 h-10 w-10 rounded-full border border-border bg-background/80 backdrop-blur-sm flex items-center justify-center hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors"
-      >
-        <ChevronLeft size={18} />
-      </button>
-      <button
-        type="button"
-        onClick={() => scrollByAmount(1)}
-        aria-label="Scroll right"
-        className="absolute right-1 md:right-2 top-1/2 -translate-y-1/2 z-20 h-10 w-10 rounded-full border border-border bg-background/80 backdrop-blur-sm flex items-center justify-center hover:bg-primary hover:text-primary-foreground hover:border-primary transition-colors"
-      >
-        <ChevronRight size={18} />
-      </button>
+      <p className="text-center mt-5 text-[10px] uppercase tracking-widest text-muted-foreground/40">
+        Hover to pause
+      </p>
     </div>
   )
 }
@@ -179,7 +175,6 @@ export default function Home() {
   const location = useLocation()
   const [aboutRef, aboutVisible] = useReveal()
 
-  // Coming from another page via a "/#hash" link — scroll once mounted.
   useEffect(() => {
     if (!location.hash) return
     const el = document.querySelector(location.hash)
@@ -191,7 +186,6 @@ export default function Home() {
 
   return (
     <main>
-      {/* Hero */}
       <section
         id="hero"
         className="relative min-h-[90vh] flex items-center justify-center overflow-hidden"
@@ -213,9 +207,9 @@ export default function Home() {
             className="h-16 w-auto mx-auto invert drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)]"
           />
           <h1 className="text-6xl md:text-8xl font-display font-semibold tracking-tight leading-none uppercase drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]">
-            Energy<br />
-            <span className="text-primary">Lab</span>
-          </h1>
+             Energy<br />
+             <span className="text-primary">Lab</span>
+            </h1>
           <p className="text-accent tracking-widest uppercase text-xs drop-shadow-[0_1px_6px_rgba(0,0,0,0.6)]">
             Fitness · Wellness · Pilates
           </p>
@@ -238,7 +232,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* About — framed photo left, copy right */}
       <section id="about" className="max-w-5xl mx-auto px-6 py-24 scroll-mt-16">
         <div
           ref={aboutRef}
@@ -267,7 +260,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Our Space — scrollable gallery */}
       <section id="space" className="max-w-6xl mx-auto px-6 py-24 scroll-mt-16">
         <div className="text-center space-y-3 mb-14">
           <p className="text-xs uppercase tracking-widest text-accent">Take a look inside</p>
@@ -279,12 +271,10 @@ export default function Home() {
         <SpaceCarousel />
       </section>
 
-      {/* Services — staggered cards + scroll filament */}
       <section id="services" className="relative max-w-4xl mx-auto px-6 py-28 scroll-mt-16">
         <h2 className="text-3xl md:text-4xl font-display font-semibold mb-20 text-center">
           What We Offer
         </h2>
-
         <div className="relative">
           <ScrollFilament className="hidden md:block" />
           <div className="relative z-10 flex flex-col gap-20 md:gap-28">
@@ -295,7 +285,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA band */}
       <section className="bg-primary/10 border-y border-primary/20 py-16 px-6 text-center space-y-6">
         <p className="text-2xl font-display font-semibold">Ready to start your journey?</p>
         {isSignedIn ? (
@@ -311,13 +300,11 @@ export default function Home() {
         )}
       </section>
 
-      {/* Contact */}
       <section id="contact" className="max-w-3xl mx-auto px-6 py-24 space-y-12 scroll-mt-16">
         <div className="text-center space-y-3">
           <h2 className="text-3xl md:text-4xl font-display font-semibold">Get in Touch</h2>
           <p className="text-muted-foreground text-sm">We'd love to hear from you.</p>
         </div>
-
         <div className="grid sm:grid-cols-3 gap-6">
           {[
             { icon: MapPin, label: "Location", value: "123 Energy Street\nTunis, Tunisia" },
