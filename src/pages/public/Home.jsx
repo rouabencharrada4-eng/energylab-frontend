@@ -210,6 +210,7 @@ export default function Home() {
       <section
         id="hero"
         className="relative min-h-[90vh] flex items-center justify-center overflow-hidden"
+        style={{ paddingTop: "calc(4rem + var(--announcement-h, 0px))" }}
       >
         <div className="absolute inset-0">
           <img

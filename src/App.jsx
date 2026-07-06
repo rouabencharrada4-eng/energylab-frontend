@@ -26,7 +26,7 @@ const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 
 function AdminLayout({ children }) {
   return (
-    <div className="flex min-h-screen pt-16">
+    <div className="flex min-h-screen" style={{ paddingTop: "calc(4rem + var(--announcement-h, 0px))" }}>
       <Sidebar />
       <main className="flex-1 p-8 overflow-auto">{children}</main>
     </div>

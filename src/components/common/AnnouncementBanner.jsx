@@ -1,12 +1,37 @@
-import { useState, useEffect } from "react"
-import { X } from "lucide-react"
+import { useState, useEffect, useRef } from "react"
+import { X, Sparkles } from "lucide-react"
 
 const POLL_MS = 60_000
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"
 
+// Publishes the banner's real rendered height as a CSS var (--announcement-h)
+// so the fixed Navbar and the Hero section can reserve space for it instead
+// of guessing a fixed offset and colliding with it.
+function usePublishedHeight(active, ref) {
+  useEffect(() => {
+    const root = document.documentElement
+
+    if (!active || !ref.current) {
+      root.style.setProperty("--announcement-h", "0px")
+      return
+    }
+
+    const el = ref.current
+    const update = () => root.style.setProperty("--announcement-h", `${el.offsetHeight}px`)
+    update()
+
+    const observer = new ResizeObserver(update)
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [active, ref])
+
+  useEffect(() => () => document.documentElement.style.setProperty("--announcement-h", "0px"), [])
+}
+
 export default function AnnouncementBanner() {
   const [announcement, setAnnouncement] = useState(null)
   const [dismissed, setDismissed] = useState(false)
+  const barRef = useRef(null)
 
   useEffect(() => {
     setDismissed(false)
@@ -37,28 +62,29 @@ export default function AnnouncementBanner() {
     }
   }, [])
 
-  if (dismissed || !announcement) return null
+  const visible = !dismissed && !!announcement
+  usePublishedHeight(visible, barRef)
 
   return (
-    <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[60] animate-fade-in pointer-events-none">
+    <div
+      className="fixed top-0 inset-x-0 z-[70] overflow-hidden transition-[max-height] duration-300 ease-out"
+      style={{ maxHeight: visible ? 56 : 0 }}
+      aria-hidden={!visible}
+    >
       <div
-        className="flex items-center gap-3 rounded-full px-5 py-2 pointer-events-auto"
-        style={{
-          background: "rgba(255, 255, 255, 0.05)",
-          backdropFilter: "blur(8px)",
-          WebkitBackdropFilter: "blur(8px)",
-          border: "1px solid rgba(255, 255, 255, 0.1)",
-        }}
+        ref={barRef}
+        className="relative flex items-center justify-center gap-2 bg-primary px-12 py-2.5 text-center border-b border-primary-foreground/10"
       >
-        <span className="text-[12px] tracking-widest uppercase text-accent font-medium whitespace-nowrap">
-          {announcement.content}
+        <Sparkles size={13} className="text-primary-foreground/80 shrink-0" strokeWidth={1.5} />
+        <span className="text-[11px] md:text-xs tracking-widest uppercase text-primary-foreground font-medium">
+          {announcement?.content}
         </span>
         <button
           onClick={() => setDismissed(true)}
-          className="text-muted-foreground/60 hover:text-accent transition-colors duration-200 ml-1"
-          aria-label="Dismiss"
+          className="absolute right-4 top-1/2 -translate-y-1/2 text-primary-foreground/70 hover:text-primary-foreground transition-colors duration-200"
+          aria-label="Dismiss announcement"
         >
-          <X size={13} strokeWidth={1.5} />
+          <X size={14} strokeWidth={1.5} />
         </button>
       </div>
     </div>
