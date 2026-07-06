@@ -8,19 +8,43 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 
 const empty = { content: "", is_active: true, starts_at: "", ends_at: "" }
 
+// <input type="datetime-local"> works in naive local wall-clock time (no
+// timezone offset), but the backend stores/compares UTC (datetime.utcnow()).
+// These helpers convert at the boundary so "2:30 PM" in the admin's browser
+// really means 2:30 PM there, not 2:30 PM UTC.
+function utcIsoToLocalInput(utcIso) {
+  if (!utcIso) return ""
+  const d = new Date(utcIso)
+  const tzOffsetMs = d.getTimezoneOffset() * 60000
+  return new Date(d.getTime() - tzOffsetMs).toISOString().slice(0, 16)
+}
+
+function localInputToUtcIso(localValue) {
+  return localValue ? new Date(localValue).toISOString() : null
+}
+
 export default function AnnouncementForm({ open, onClose, onSave, initial = null }) {
   const [form, setForm] = useState(empty)
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    setForm(initial ? { ...empty, ...initial } : empty)
+    setForm(initial ? {
+      ...empty,
+      ...initial,
+      starts_at: utcIsoToLocalInput(initial.starts_at),
+      ends_at:   utcIsoToLocalInput(initial.ends_at),
+    } : empty)
   }, [initial, open])
 
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }))
 
   const handleSubmit = async () => {
     setSaving(true)
-    await onSave({ ...form, starts_at: form.starts_at || null, ends_at: form.ends_at || null })
+    await onSave({
+      ...form,
+      starts_at: localInputToUtcIso(form.starts_at),
+      ends_at:   localInputToUtcIso(form.ends_at),
+    })
     setSaving(false)
     onClose()
   }
