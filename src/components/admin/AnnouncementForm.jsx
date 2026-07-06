@@ -26,6 +26,7 @@ function localInputToUtcIso(localValue) {
 export default function AnnouncementForm({ open, onClose, onSave, initial = null }) {
   const [form, setForm] = useState(empty)
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     setForm(initial ? {
@@ -38,19 +39,28 @@ export default function AnnouncementForm({ open, onClose, onSave, initial = null
 
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }))
 
+  const handleClose = () => { setError(null); onClose() }
+
   const handleSubmit = async () => {
     setSaving(true)
-    await onSave({
-      ...form,
-      starts_at: localInputToUtcIso(form.starts_at),
-      ends_at:   localInputToUtcIso(form.ends_at),
-    })
-    setSaving(false)
-    onClose()
+    setError(null)
+    try {
+      await onSave({
+        ...form,
+        starts_at: localInputToUtcIso(form.starts_at),
+        ends_at:   localInputToUtcIso(form.ends_at),
+      })
+      handleClose()
+    } catch (e) {
+      console.error("Failed to save announcement:", e)
+      setError("Failed to save. Check that you're signed in and the server is running.")
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>{initial ? "Edit Announcement" : "New Announcement"}</DialogTitle>
@@ -83,7 +93,8 @@ export default function AnnouncementForm({ open, onClose, onSave, initial = null
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          {error && <p className="text-sm text-destructive w-full">{error}</p>}
+          <Button variant="outline" onClick={handleClose}>Cancel</Button>
           <Button onClick={handleSubmit} disabled={saving || !form.content}>
             {saving ? "Saving..." : "Save"}
           </Button>

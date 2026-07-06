@@ -40,9 +40,9 @@ export default function AnnouncementBanner() {
   if (dismissed || !announcement) return null
 
   return (
-    <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[60] animate-fade-in">
+    <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[60] animate-fade-in pointer-events-none">
       <div
-        className="flex items-center gap-3 rounded-full px-5 py-2"
+        className="flex items-center gap-3 rounded-full px-5 py-2 pointer-events-auto"
         style={{
           background: "rgba(255, 255, 255, 0.05)",
           backdropFilter: "blur(8px)",

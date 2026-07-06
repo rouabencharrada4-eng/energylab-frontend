@@ -15,15 +15,19 @@ export function initApiAuth(getToken) {
 api.interceptors.request.use(async (config) => {
   if (_getToken) {
     try {
-      // skipCache: true forces Clerk to fetch a fresh token
-      const token = await _getToken({ skipCache: true })
+      const token = await Promise.race([
+        _getToken({ skipCache: true }),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("getToken timeout")), 5000)
+        ),
+      ])
       if (token) {
         config.headers["Authorization"] = `Bearer ${token}`
       } else {
         console.warn("[API] getToken returned null — not signed in?")
       }
     } catch (e) {
-      console.error("[API] getToken threw:", e)
+      console.error("[API] getToken failed:", e)
     }
   }
   return config
