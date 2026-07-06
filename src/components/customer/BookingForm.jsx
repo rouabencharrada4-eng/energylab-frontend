@@ -5,8 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useServices, useCoaches, useTimeSlots } from "@/hooks/useServices"
-import { formatDate, formatTime } from "@/lib/utils"
-
+import TimeSlotCalendar from "@/components/customer/TimeSlotCalendar"
 // A phone number is considered valid if it has at least 8 digits,
 // optionally prefixed with + and containing spaces/dashes/parentheses.
 const PHONE_REGEX = /^\+?[0-9\s()-]{8,20}$/
@@ -43,10 +42,6 @@ export default function BookingForm({ onSubmit, loading }) {
     ...filteredCoaches.map(c => ({ value: c.id, label: c.full_name })),
   ]
 
-  const slotItems = timeSlots.map(slot => ({
-    value: slot.id,
-    label: `${formatDate(slot.date)} · ${formatTime(slot.start_time)} – ${formatTime(slot.end_time)}${slot.coach ? ` · ${slot.coach.full_name}` : ""}`,
-  }))
 
   return (
     <div className="space-y-5">
@@ -90,20 +85,7 @@ export default function BookingForm({ onSubmit, loading }) {
       {serviceId && (
         <div className="space-y-1.5">
           <Label>Available Slot</Label>
-          <Select value={slotId} onValueChange={setSlotId} items={slotItems}>
-            <SelectTrigger><SelectValue placeholder="Pick a time slot" /></SelectTrigger>
-            <SelectContent>
-              {timeSlots.length === 0 && (
-                <SelectItem value="_none" disabled>No slots available</SelectItem>
-              )}
-              {timeSlots.map(slot => (
-                <SelectItem key={slot.id} value={slot.id}>
-                  {formatDate(slot.date)} · {formatTime(slot.start_time)} – {formatTime(slot.end_time)}
-                  {slot.coach ? ` · ${slot.coach.full_name}` : ""}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <TimeSlotCalendar timeSlots={timeSlots} slotId={slotId} onSelect={setSlotId} />
         </div>
       )}
 
