@@ -78,3 +78,42 @@ export function useTimeSlots(params) {
 
   return { timeSlots, loading, refetch: fetchSlots }
 }
+
+// Admin-side: fetches ALL time slots (no service/coach filter) and exposes
+// create/update/remove so the admin dashboard can manage availability.
+export function useAdminTimeSlots() {
+  const [timeSlots, setTimeSlots] = useState([])
+  const [loading, setLoading]     = useState(true)
+  const [error, setError]         = useState(null)
+
+  const fetchSlots = useCallback(async () => {
+    try {
+      setLoading(true)
+      const res = await timeSlotsApi.getAll({})
+      setTimeSlots(res.data)
+    } catch (err) {
+      setError(err.response?.data?.detail || "Failed to load time slots")
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { fetchSlots() }, [fetchSlots])
+
+  const createSlot = async (data) => {
+    await timeSlotsApi.create(data)
+    await fetchSlots()
+  }
+
+  const updateSlot = async (id, data) => {
+    await timeSlotsApi.update(id, data)
+    await fetchSlots()
+  }
+
+  const removeSlot = async (id) => {
+    await timeSlotsApi.remove(id)
+    await fetchSlots()
+  }
+
+  return { timeSlots, loading, error, refetch: fetchSlots, createSlot, updateSlot, removeSlot }
+}

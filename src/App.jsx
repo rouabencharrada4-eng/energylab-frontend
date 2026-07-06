@@ -11,6 +11,7 @@ import Home from "@/pages/public/Home"
 
 import AdminDashboard     from "@/pages/admin/Dashboard"
 import AdminBookings      from "@/pages/admin/Bookings"
+import AdminTimeSlots     from "@/pages/admin/TimeSlots"
 import AdminServices      from "@/pages/admin/Services"
 import AdminUsers         from "@/pages/admin/Users"
 import AdminAnnouncements from "@/pages/admin/Announcements"
@@ -64,6 +65,9 @@ export default function App() {
           } />
           <Route path="/admin/bookings" element={
             <ProtectedRoute requireAdmin><AdminLayout><AdminBookings /></AdminLayout></ProtectedRoute>
+          } />
+          <Route path="/admin/time-slots" element={
+            <ProtectedRoute requireAdmin><AdminLayout><AdminTimeSlots /></AdminLayout></ProtectedRoute>
           } />
           <Route path="/admin/services" element={
             <ProtectedRoute requireAdmin><AdminLayout><AdminServices /></AdminLayout></ProtectedRoute>
