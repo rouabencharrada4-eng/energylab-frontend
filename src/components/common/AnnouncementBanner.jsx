@@ -1,29 +1,29 @@
 import { useState, useEffect } from "react"
-import { useLocation } from "react-router-dom"
 import { X } from "lucide-react"
-import { announcementsApi } from "@/lib/api"
 
-// Refetch the active announcement whenever the visitor lands back on "/",
-// plus a periodic poll. This component is mounted once, permanently,
-// outside <Routes> (so Navbar/Footer/banner persist across pages) — that
-// means a plain `useEffect(..., [])` only ever fetches once, at the moment
-// the tab was first opened. Without this, an announcement created in the
-// admin dashboard never appears until the visitor does a hard refresh.
 const POLL_MS = 60_000
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"
 
 export default function AnnouncementBanner() {
   const [announcement, setAnnouncement] = useState(null)
   const [dismissed, setDismissed] = useState(false)
-  const { pathname } = useLocation()
+
+  useEffect(() => {
+    setDismissed(false)
+  }, [announcement?.id])
 
   useEffect(() => {
     let cancelled = false
 
     const fetchActive = () => {
-      announcementsApi.getActive()
+      fetch(`${API_URL}/announcements/active`)
         .then(res => {
+          if (!res.ok) return
+          return res.json()
+        })
+        .then(data => {
           if (cancelled) return
-          setAnnouncement(res.data.length > 0 ? res.data[0] : null)
+          setAnnouncement(data && data.length > 0 ? data[0] : null)
         })
         .catch(() => {})
     }
@@ -35,20 +35,32 @@ export default function AnnouncementBanner() {
       cancelled = true
       clearInterval(interval)
     }
-  }, [pathname === "/"]) // re-run the effect when navigating to/away from home
+  }, [])
 
   if (dismissed || !announcement) return null
 
   return (
-    <div className="relative bg-primary text-primary-foreground text-center text-sm py-2.5 px-10">
-      <p className="tracking-wide">{announcement.content}</p>
-      <button
-        onClick={() => setDismissed(true)}
-        className="absolute right-4 top-1/2 -translate-y-1/2 opacity-70 hover:opacity-100 transition-opacity"
-        aria-label="Dismiss"
+    <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[60] animate-fade-in">
+      <div
+        className="flex items-center gap-3 rounded-full px-5 py-2"
+        style={{
+          background: "rgba(255, 255, 255, 0.05)",
+          backdropFilter: "blur(8px)",
+          WebkitBackdropFilter: "blur(8px)",
+          border: "1px solid rgba(255, 255, 255, 0.1)",
+        }}
       >
-        <X size={14} />
-      </button>
+        <span className="text-[12px] tracking-widest uppercase text-accent font-medium whitespace-nowrap">
+          {announcement.content}
+        </span>
+        <button
+          onClick={() => setDismissed(true)}
+          className="text-muted-foreground/60 hover:text-accent transition-colors duration-200 ml-1"
+          aria-label="Dismiss"
+        >
+          <X size={13} strokeWidth={1.5} />
+        </button>
+      </div>
     </div>
   )
 }
