@@ -1,10 +1,15 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useServices, useCoaches, useTimeSlots } from "@/hooks/useServices"
 import { formatDate, formatTime } from "@/lib/utils"
+
+// A phone number is considered valid if it has at least 8 digits,
+// optionally prefixed with + and containing spaces/dashes/parentheses.
+const PHONE_REGEX = /^\+?[0-9\s()-]{8,20}$/
 
 export default function BookingForm({ onSubmit, loading }) {
   const { services, loading: servicesLoading, error: servicesError }  = useServices()
@@ -12,7 +17,9 @@ export default function BookingForm({ onSubmit, loading }) {
   const [serviceId, setServiceId] = useState("")
   const [coachId,   setCoachId]   = useState("")
   const [slotId,    setSlotId]    = useState("")
+  const [phone,     setPhone]     = useState("")
   const [notes,     setNotes]     = useState("")
+  const [phoneTouched, setPhoneTouched] = useState(false)
 
   const { timeSlots } = useTimeSlots(
     serviceId ? { service_id: serviceId, ...(coachId ? { coach_id: coachId } : {}) } : null
@@ -24,11 +31,28 @@ export default function BookingForm({ onSubmit, loading }) {
   const selectedService  = services.find(s => s.id === serviceId)
   const filteredCoaches  = coaches.filter(c => c.services?.some(s => s.id === serviceId))
 
+  const phoneValid   = PHONE_REGEX.test(phone.trim())
+  const phoneInvalid = phoneTouched && !phoneValid
+
+  const serviceItems = services
+    .filter(s => s.is_active)
+    .map(s => ({ value: s.id, label: s.name }))
+
+  const coachItems = [
+    { value: "", label: "Any" },
+    ...filteredCoaches.map(c => ({ value: c.id, label: c.full_name })),
+  ]
+
+  const slotItems = timeSlots.map(slot => ({
+    value: slot.id,
+    label: `${formatDate(slot.date)} · ${formatTime(slot.start_time)} – ${formatTime(slot.end_time)}${slot.coach ? ` · ${slot.coach.full_name}` : ""}`,
+  }))
+
   return (
     <div className="space-y-5">
       <div className="space-y-1.5">
         <Label>Service</Label>
-        <Select value={serviceId} onValueChange={setServiceId} disabled={servicesLoading}>
+        <Select value={serviceId} onValueChange={setServiceId} disabled={servicesLoading} items={serviceItems}>
           <SelectTrigger>
             <SelectValue placeholder={servicesLoading ? "Loading services..." : "Select a service"} />
           </SelectTrigger>
@@ -51,7 +75,7 @@ export default function BookingForm({ onSubmit, loading }) {
       {selectedService?.requires_coach && (
         <div className="space-y-1.5">
           <Label>Coach (optional)</Label>
-          <Select value={coachId} onValueChange={setCoachId}>
+          <Select value={coachId} onValueChange={setCoachId} items={coachItems}>
             <SelectTrigger><SelectValue placeholder="Any available coach" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="">Any</SelectItem>
@@ -66,7 +90,7 @@ export default function BookingForm({ onSubmit, loading }) {
       {serviceId && (
         <div className="space-y-1.5">
           <Label>Available Slot</Label>
-          <Select value={slotId} onValueChange={setSlotId}>
+          <Select value={slotId} onValueChange={setSlotId} items={slotItems}>
             <SelectTrigger><SelectValue placeholder="Pick a time slot" /></SelectTrigger>
             <SelectContent>
               {timeSlots.length === 0 && (
@@ -84,6 +108,25 @@ export default function BookingForm({ onSubmit, loading }) {
       )}
 
       <div className="space-y-1.5">
+        <Label htmlFor="customer-phone">Phone Number</Label>
+        <Input
+          id="customer-phone"
+          type="tel"
+          value={phone}
+          onChange={e => setPhone(e.target.value)}
+          onBlur={() => setPhoneTouched(true)}
+          placeholder="e.g. 12 345 678"
+          aria-invalid={phoneInvalid}
+          required
+        />
+        {phoneInvalid && (
+          <p className="text-sm text-destructive">
+            Please enter a valid phone number so we can reach you about this booking.
+          </p>
+        )}
+      </div>
+
+      <div className="space-y-1.5">
         <Label>Notes (optional)</Label>
         <Textarea
           value={notes}
@@ -94,8 +137,14 @@ export default function BookingForm({ onSubmit, loading }) {
       </div>
 
       <Button
-        onClick={() => onSubmit({ time_slot_id: slotId, customer_notes: notes })}
-        disabled={!slotId || loading}
+        onClick={() => {
+          if (!phoneValid) {
+            setPhoneTouched(true)
+            return
+          }
+          onSubmit({ time_slot_id: slotId, customer_phone: phone.trim(), customer_notes: notes })
+        }}
+        disabled={!slotId || !phoneValid || loading}
         className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
       >
         {loading ? "Requesting..." : "Request Booking"}

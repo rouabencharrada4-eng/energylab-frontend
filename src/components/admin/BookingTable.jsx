@@ -57,6 +57,9 @@ export default function BookingTable({ bookings, onUpdateStatus, loading }) {
                 <TableCell>
                   <p className="font-medium text-sm">{b.customer?.full_name}</p>
                   <p className="text-xs text-muted-foreground">{b.customer?.email}</p>
+                  {b.customer_phone && (
+                    <p className="text-xs text-muted-foreground">{b.customer_phone}</p>
+                  )}
                 </TableCell>
                 <TableCell className="text-sm">{b.time_slot?.service?.name}</TableCell>
                 <TableCell className="text-sm">{b.time_slot?.coach?.full_name ?? "—"}</TableCell>
