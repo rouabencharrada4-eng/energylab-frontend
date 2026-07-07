@@ -13,6 +13,7 @@ const showcase = [
     description:
       "Strength, conditioning, or a mix of both — a dedicated coach designs every session around your goals and pace.",
     align: "left",
+    bookable: true,
   },
   {
     id: "inbody",
@@ -21,6 +22,7 @@ const showcase = [
     description:
       "Precise body composition scans that track real progress — muscle, fat, water — far beyond what a scale can tell you.",
     align: "right",
+    bookable: false,
   },
   {
     id: "pilates",
@@ -29,6 +31,7 @@ const showcase = [
     description:
       "Mat and reformer sessions focused on controlled movement, flexibility, and a stronger core.",
     align: "left",
+    bookable: true,
   },
 ]
 
@@ -109,16 +112,18 @@ function ShowcaseCard({ item }) {
         <p className={`text-sm text-muted-foreground leading-relaxed max-w-xs ${isRight ? "md:ml-auto" : ""}`}>
           {item.description}
         </p>
-        {isSignedIn ? (
-          <Button asChild size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-            <Link to="/book">Book Now</Link>
-          </Button>
-        ) : (
-          <SignInButton mode="modal">
-            <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-              Book Now
+        {item.bookable && (
+          isSignedIn ? (
+            <Button asChild size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground">
+              <Link to="/book">Book Now</Link>
             </Button>
-          </SignInButton>
+          ) : (
+            <SignInButton mode="modal">
+              <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                Book Now
+              </Button>
+            </SignInButton>
+          )
         )}
       </div>
     </div>

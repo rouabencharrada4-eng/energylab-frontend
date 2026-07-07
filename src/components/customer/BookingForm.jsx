@@ -33,9 +33,11 @@ export default function BookingForm({ onSubmit, loading }) {
   const phoneValid   = PHONE_REGEX.test(phone.trim())
   const phoneInvalid = phoneTouched && !phoneValid
 
-  const serviceItems = services
-    .filter(s => s.is_active)
-    .map(s => ({ value: s.id, label: s.name }))
+  // Only Private Coaching and Pilates can be booked through this form —
+  // the Inbody Machine service doesn't use a coach, so it's excluded here.
+  const bookableServices = services.filter(s => s.is_active && s.requires_coach)
+
+  const serviceItems = bookableServices.map(s => ({ value: s.id, label: s.name }))
 
   const coachItems = [
     { value: "", label: "Any" },
@@ -44,15 +46,15 @@ export default function BookingForm({ onSubmit, loading }) {
 
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 rounded-2xl border-2 border-primary p-6">
       <div className="space-y-1.5">
         <Label>Service</Label>
         <Select value={serviceId} onValueChange={setServiceId} disabled={servicesLoading} items={serviceItems}>
-          <SelectTrigger>
+          <SelectTrigger className="w-full border-primary/50 focus-visible:border-primary">
             <SelectValue placeholder={servicesLoading ? "Loading services..." : "Select a service"} />
           </SelectTrigger>
           <SelectContent>
-            {services.filter(s => s.is_active).map(s => (
+            {bookableServices.map(s => (
               <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
             ))}
           </SelectContent>
@@ -62,7 +64,7 @@ export default function BookingForm({ onSubmit, loading }) {
             Couldn't load services: {servicesError}
           </p>
         )}
-        {!servicesLoading && !servicesError && services.length === 0 && (
+        {!servicesLoading && !servicesError && bookableServices.length === 0 && (
           <p className="text-sm text-muted-foreground">No services available right now.</p>
         )}
       </div>
@@ -71,7 +73,9 @@ export default function BookingForm({ onSubmit, loading }) {
         <div className="space-y-1.5">
           <Label>Coach (optional)</Label>
           <Select value={coachId} onValueChange={setCoachId} items={coachItems}>
-            <SelectTrigger><SelectValue placeholder="Any available coach" /></SelectTrigger>
+            <SelectTrigger className="w-full border-primary/50 focus-visible:border-primary">
+              <SelectValue placeholder="Any available coach" />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="">Any</SelectItem>
               {filteredCoaches.map(c => (
@@ -97,9 +101,10 @@ export default function BookingForm({ onSubmit, loading }) {
           value={phone}
           onChange={e => setPhone(e.target.value)}
           onBlur={() => setPhoneTouched(true)}
-          placeholder="e.g. 12 345 678"
+          placeholder="+216 xx xxx xxx"
           aria-invalid={phoneInvalid}
           required
+          className="border-primary/50 focus-visible:border-primary"
         />
         {phoneInvalid && (
           <p className="text-sm text-destructive">
@@ -115,6 +120,7 @@ export default function BookingForm({ onSubmit, loading }) {
           onChange={e => setNotes(e.target.value)}
           placeholder="Any context for the coach..."
           rows={2}
+          className="border-primary/50 focus-visible:border-primary"
         />
       </div>
 
