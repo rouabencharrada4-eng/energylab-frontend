@@ -1,3 +1,4 @@
+// src/lib/api.js
 import axios from "axios"
 
 const api = axios.create({
@@ -44,6 +45,11 @@ export const servicesApi = {
   create: (data)     => api.post("/services", data),
   update: (id, data) => api.put(`/services/${id}`, data),
   remove: (id)       => api.delete(`/services/${id}`),
+  uploadImage: (id, file) => {
+    const form = new FormData()
+    form.append("file", file)
+    return api.post(`/services/${id}/image`, form, { headers: { "Content-Type": "multipart/form-data" } })
+  },
 }
 
 export const coachesApi = {
@@ -74,6 +80,45 @@ export const announcementsApi = {
   create:    (data)     => api.post("/announcements", data),
   update:    (id, data) => api.put(`/announcements/${id}`, data),
   remove:    (id)       => api.delete(`/announcements/${id}`),
+}
+
+export const siteContentApi = {
+  get:         ()             => api.get("/site-content"),
+  update:      (values)       => api.put("/site-content", { values }),
+  uploadImage: (key, file) => {
+    const form = new FormData()
+    form.append("file", file)
+    return api.post(`/site-content/image?key=${encodeURIComponent(key)}`, form, {
+      headers: { "Content-Type": "multipart/form-data" },
+    })
+  },
+}
+
+export const galleryApi = {
+  getPublic: ()         => api.get("/gallery"),
+  getAll:    ()         => api.get("/gallery/all"),
+  add:       (file, caption, sortOrder) => {
+    const form = new FormData()
+    form.append("file", file)
+    form.append("caption", caption || "")
+    form.append("sort_order", sortOrder ?? 0)
+    return api.post("/gallery", form, { headers: { "Content-Type": "multipart/form-data" } })
+  },
+  update: (id, data) => api.put(`/gallery/${id}`, data),
+  remove: (id)       => api.delete(`/gallery/${id}`),
+}
+
+export const showcaseApi = {
+  getPublic:   ()         => api.get("/showcase"),
+  getAll:      ()         => api.get("/showcase/all"),
+  create:      (data)     => api.post("/showcase", data),
+  update:      (id, data) => api.put(`/showcase/${id}`, data),
+  remove:      (id)       => api.delete(`/showcase/${id}`),
+  uploadImage: (id, file) => {
+    const form = new FormData()
+    form.append("file", file)
+    return api.post(`/showcase/${id}/image`, form, { headers: { "Content-Type": "multipart/form-data" } })
+  },
 }
 
 export default api

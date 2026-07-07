@@ -1,15 +1,44 @@
+// src/pages/public/Home.jsx
 import { useEffect, useRef, useState } from "react"
 import { useLocation, Link } from "react-router-dom"
 import { SignInButton, useUser } from "@clerk/clerk-react"
 import { Button } from "@/components/ui/button"
 import { Mail, MapPin, Phone } from "lucide-react"
 import ScrollFilament from "@/components/common/ScrollFilament"
+import { siteContentApi, galleryApi, showcaseApi } from "@/lib/api"
 
-const showcase = [
+// Everything below is served from the admin-editable backend (Website tab in
+// the admin dashboard). These DEFAULT_* values are only a fallback so the
+// homepage renders instantly with sensible content while the live data loads
+// (or if the API is briefly unreachable) — no blank states, no layout jump.
+const DEFAULT_CONTENT = {
+  hero_title_line1: "Energy",
+  hero_title_line2: "Lab",
+  hero_tagline: "Fitness · Wellness · Pilates",
+  hero_bg_url: "/assets/hero-bg.jpg",
+  logo_url: "/assets/logo-mark.png",
+
+  about_heading: "About Us",
+  about_paragraph_1: "Welcome to Energy Lab—a space where movement, wellness, and mindfulness come together.",
+  about_paragraph_2: "We believe true strength is built through intention, not intensity. Every Pilates session is thoughtfully designed around controlled movement and mindful breathing, helping you strengthen your body, improve mobility, and cultivate lasting balance.",
+  about_paragraph_3: "From private coaching and group classes to InBody assessments, every experience is tailored to support your individual journey. Our studio offers a peaceful, modern environment where you can disconnect from the pace of everyday life and reconnect with yourself.",
+  about_paragraph_4: "At Energy Lab, wellness isn't just a workout—it's a way of living.",
+  about_image_url: "/assets/about_us.png",
+
+  space_heading: "Our Space",
+  space_subheading: "A quiet, modern studio designed for focus — here's a glimpse before you visit.",
+
+  contact_location: "Tunis, Lafayette 5020",
+  contact_phone: "55 555 555",
+  contact_email: "energylab-contact@gmail.com",
+  map_query: "Tunis, Lafayette 5020, Tunisia",
+}
+
+const DEFAULT_SHOWCASE = [
   {
     id: "coaching",
     name: "Private Coaching",
-    image: "/assets/card_1.png",
+    image_url: "/assets/card_1.png",
     description:
       "Strength, conditioning, or a mix of both — a dedicated coach designs every session around your goals and pace.",
     align: "left",
@@ -18,7 +47,7 @@ const showcase = [
   {
     id: "inbody",
     name: "Inbody Machine Service",
-    image: "/assets/card_3.png",
+    image_url: "/assets/card_3.png",
     description:
       "Precise body composition scans that track real progress — muscle, fat, water — far beyond what a scale can tell you.",
     align: "right",
@@ -27,7 +56,7 @@ const showcase = [
   {
     id: "pilates",
     name: "Pilates",
-    image: "/assets/card_2.png",
+    image_url: "/assets/card_2.png",
     description:
       "Mat and reformer sessions focused on controlled movement, flexibility, and a stronger core.",
     align: "left",
@@ -35,34 +64,17 @@ const showcase = [
   },
 ]
 
-const gallery = [
-  { src: "/assets/center_1.jpeg", caption: "The studio floor" },
-  { src: "/assets/center_2.jpeg", caption: "Reformer room" },
-  { src: "/assets/center_3.jpeg", caption: "Equipment wall" },
-  { src: "/assets/center_4.jpeg", caption: "Private coaching space" },
-  { src: "/assets/center_5.jpeg", caption: "Mat & stretch area" },
-  { src: "/assets/center_6.jpeg", caption: "Reception" },
-  { src: "/assets/center_7.jpeg", caption: "Studio detail" },
-  { src: "/assets/center_8.jpeg", caption: "Natural light corner" },
-  { src: "/assets/center_9.jpeg", caption: "Entrance" },
+const DEFAULT_GALLERY = [
+  { id: "g1", image_url: "/assets/center_1.jpeg", caption: "The studio floor" },
+  { id: "g2", image_url: "/assets/center_2.jpeg", caption: "Reformer room" },
+  { id: "g3", image_url: "/assets/center_3.jpeg", caption: "Equipment wall" },
+  { id: "g4", image_url: "/assets/center_4.jpeg", caption: "Private coaching space" },
+  { id: "g5", image_url: "/assets/center_5.jpeg", caption: "Mat & stretch area" },
+  { id: "g6", image_url: "/assets/center_6.jpeg", caption: "Reception" },
+  { id: "g7", image_url: "/assets/center_7.jpeg", caption: "Studio detail" },
+  { id: "g8", image_url: "/assets/center_8.jpeg", caption: "Natural light corner" },
+  { id: "g9", image_url: "/assets/center_9.jpeg", caption: "Entrance" },
 ]
-
-const aboutParagraphs = [
-  "Welcome to Energy Lab—a space where movement, wellness, and mindfulness come together.",
-  "We believe true strength is built through intention, not intensity. Every Pilates session is thoughtfully designed around controlled movement and mindful breathing, helping you strengthen your body, improve mobility, and cultivate lasting balance.",
-  "From private coaching and group classes to InBody assessments, every experience is tailored to support your individual journey. Our studio offers a peaceful, modern environment where you can disconnect from the pace of everyday life and reconnect with yourself.",
-  "At Energy Lab, wellness isn't just a workout—it's a way of living.",
-]
-
-const contactInfo = [
-  { icon: MapPin, label: "Location", value: "Tunis, Lafayette 5020" },
-  { icon: Phone,  label: "Phone",    value: "55 555 555" },
-  { icon: Mail,   label: "Email",    value: "energylab-contact@gmail.com" },
-]
-
-// Swap this for the exact address (or a "lat,lng" pair, e.g. "36.8065,10.1815")
-// once the precise studio location is confirmed — the map below updates automatically.
-const MAP_QUERY = "Tunis, Lafayette 5020, Tunisia"
 
 function useReveal() {
   const ref = useRef(null)
@@ -101,7 +113,7 @@ function ShowcaseCard({ item }) {
     >
       <div className="rounded-2xl border-2 border-primary p-3 shrink-0">
         <img
-  src={item.image}
+  src={item.image_url}
   alt={item.name}
   className="w-[320px] h-[440px] object-cover rounded-lg"
 />
@@ -142,7 +154,7 @@ function GalleryTile({ src, caption }) {
   )
 }
 
-function SpaceCarousel() {
+function SpaceCarousel({ gallery }) {
   const [ref, visible] = useReveal()
 
   const row1 = [...gallery, ...gallery]
@@ -172,7 +184,7 @@ function SpaceCarousel() {
             style={{ animation: "marquee-left 32s linear infinite" }}
           >
             {row1.map((g, i) => (
-              <GalleryTile key={i} src={g.src} caption={g.caption} />
+              <GalleryTile key={i} src={g.image_url} caption={g.caption} />
             ))}
           </div>
         </div>
@@ -183,7 +195,7 @@ function SpaceCarousel() {
             style={{ animation: "marquee-right 32s linear infinite" }}
           >
             {row2.map((g, i) => (
-              <GalleryTile key={i} src={g.src} caption={g.caption} />
+              <GalleryTile key={i} src={g.image_url} caption={g.caption} />
             ))}
           </div>
         </div>
@@ -200,6 +212,35 @@ export default function Home() {
   const { isSignedIn } = useUser()
   const location = useLocation()
   const [aboutRef, aboutVisible] = useReveal()
+
+  const [content, setContent] = useState(DEFAULT_CONTENT)
+  const [showcase, setShowcase] = useState(DEFAULT_SHOWCASE)
+  const [gallery, setGallery] = useState(DEFAULT_GALLERY)
+
+  useEffect(() => {
+    siteContentApi.get()
+      .then(res => setContent(c => ({ ...c, ...res.data.values })))
+      .catch(() => {}) // keep defaults on failure
+    showcaseApi.getPublic()
+      .then(res => { if (res.data.length) setShowcase(res.data) })
+      .catch(() => {})
+    galleryApi.getPublic()
+      .then(res => { if (res.data.length) setGallery(res.data) })
+      .catch(() => {})
+  }, [])
+
+  const aboutParagraphs = [
+    content.about_paragraph_1,
+    content.about_paragraph_2,
+    content.about_paragraph_3,
+    content.about_paragraph_4,
+  ].filter(Boolean)
+
+  const contactInfo = [
+    { icon: MapPin, label: "Location", value: content.contact_location },
+    { icon: Phone,  label: "Phone",    value: content.contact_phone },
+    { icon: Mail,   label: "Email",    value: content.contact_email },
+  ]
 
   useEffect(() => {
     if (!location.hash) return
@@ -219,7 +260,7 @@ export default function Home() {
       >
         <div className="absolute inset-0">
           <img
-            src="/assets/hero-bg.jpg"
+            src={content.hero_bg_url}
             alt=""
             className="h-full w-full object-cover opacity-70"
           />
@@ -229,16 +270,16 @@ export default function Home() {
 
         <div className="relative z-10 text-center max-w-3xl mx-auto px-6 space-y-8">
           <img
-            src="/assets/logo-mark.png"
+            src={content.logo_url}
             alt="EnergyLab"
             className="h-16 w-auto mx-auto invert drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)]"
           />
           <h1 className="text-6xl md:text-8xl font-display font-semibold tracking-tight leading-none uppercase drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]">
-             Energy<br />
-             <span className="text-primary">Lab</span>
+             {content.hero_title_line1}<br />
+             <span className="text-primary">{content.hero_title_line2}</span>
             </h1>
           <p className="text-accent tracking-widest uppercase text-xs drop-shadow-[0_1px_6px_rgba(0,0,0,0.6)]">
-            Fitness · Wellness · Pilates
+            {content.hero_tagline}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
             {isSignedIn ? (
@@ -269,7 +310,7 @@ export default function Home() {
           <div className="relative mx-auto md:mx-0 w-full max-w-sm">
             <div className="rounded-2xl border-2 border-primary p-3">
               <img
-                src="/assets/about_us.png"
+                src={content.about_image_url}
                 alt="Inside Energy Lab"
                 className="w-full h-[420px] object-cover rounded-lg"
               />
@@ -277,7 +318,7 @@ export default function Home() {
           </div>
 
           <div className="text-center md:text-left space-y-5">
-            <p className="text-xs uppercase tracking-widest text-accent">About Us</p>
+            <p className="text-xs uppercase tracking-widest text-accent">{content.about_heading}</p>
             {aboutParagraphs.map((paragraph, i) => (
               <p key={i} className="text-muted-foreground leading-relaxed">
                 {paragraph}
@@ -290,12 +331,12 @@ export default function Home() {
       <section id="space" className="max-w-6xl mx-auto px-6 py-24 scroll-mt-16">
         <div className="text-center space-y-3 mb-14">
           <p className="text-xs uppercase tracking-widest text-accent">Take a look inside</p>
-          <h2 className="text-3xl md:text-4xl font-display font-semibold">Our Space</h2>
+          <h2 className="text-3xl md:text-4xl font-display font-semibold">{content.space_heading}</h2>
           <p className="text-muted-foreground text-sm max-w-md mx-auto">
-            A quiet, modern studio designed for focus — here's a glimpse before you visit.
+            {content.space_subheading}
           </p>
         </div>
-        <SpaceCarousel />
+        <SpaceCarousel gallery={gallery} />
       </section>
 
       <section id="services" className="relative max-w-4xl mx-auto px-6 py-28 scroll-mt-16">
@@ -342,7 +383,7 @@ export default function Home() {
           <div className="rounded-xl border border-border/60 overflow-hidden min-h-[320px] lg:min-h-[400px]">
             <iframe
               title="Energy Lab location"
-              src={`https://www.google.com/maps?q=${encodeURIComponent(MAP_QUERY)}&output=embed`}
+              src={`https://www.google.com/maps?q=${encodeURIComponent(content.map_query)}&output=embed`}
               className="w-full h-full"
               style={{ border: 0 }}
               loading="lazy"

@@ -1,5 +1,6 @@
+// src/components/layout/Sidebar.jsx
 import { Link, useLocation } from "react-router-dom"
-import { LayoutDashboard, Calendar, CalendarClock, Dumbbell, Users, Megaphone } from "lucide-react"
+import { LayoutDashboard, Calendar, CalendarClock, Dumbbell, Users, Megaphone, Globe } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const navItems = [
@@ -7,6 +8,7 @@ const navItems = [
   { to: "/admin/bookings",      label: "Bookings",      icon: Calendar         },
   { to: "/admin/time-slots",    label: "Time Slots",    icon: CalendarClock    },
   { to: "/admin/services",      label: "Services",      icon: Dumbbell         },
+  { to: "/admin/website",       label: "Website",       icon: Globe            },
   { to: "/admin/users",         label: "Users",         icon: Users            },
   { to: "/admin/announcements", label: "Announcements", icon: Megaphone        },
 ]

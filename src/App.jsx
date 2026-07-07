@@ -1,3 +1,4 @@
+// src/App.jsx
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { ClerkProvider } from "@clerk/clerk-react"
 
@@ -13,6 +14,7 @@ import AdminDashboard     from "@/pages/admin/Dashboard"
 import AdminBookings      from "@/pages/admin/Bookings"
 import AdminTimeSlots     from "@/pages/admin/TimeSlots"
 import AdminServices      from "@/pages/admin/Services"
+import AdminWebsite       from "@/pages/admin/Website"
 import AdminUsers         from "@/pages/admin/Users"
 import AdminAnnouncements from "@/pages/admin/Announcements"
 
@@ -71,6 +73,9 @@ export default function App() {
           } />
           <Route path="/admin/services" element={
             <ProtectedRoute requireAdmin><AdminLayout><AdminServices /></AdminLayout></ProtectedRoute>
+          } />
+          <Route path="/admin/website" element={
+            <ProtectedRoute requireAdmin><AdminLayout><AdminWebsite /></AdminLayout></ProtectedRoute>
           } />
           <Route path="/admin/users" element={
             <ProtectedRoute requireAdmin><AdminLayout><AdminUsers /></AdminLayout></ProtectedRoute>
