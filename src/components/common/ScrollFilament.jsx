@@ -10,10 +10,6 @@ export default function ScrollFilament({ className = "", strokeWidth = 4 }) {
   const pathRef = useRef(null)
   const [length, setLength] = useState(0)
 
-  // Hand-tuned coordinates spaced out cleanly to match 3 alternating layout rows:
-  // Row 1 (Top): Starts left, sweeps right towards the image
-  // Row 2 (Middle): Sweeps smoothly back left towards the second image
-  // Row 3 (Bottom): Sweeps back right/center to finish out the section
   const d = `
     M 30 0
     C 30 150, 170 100, 170 300
@@ -38,29 +34,26 @@ export default function ScrollFilament({ className = "", strokeWidth = 4 }) {
       if (!parent || !pathRef.current) return
 
       const rect = parent.getBoundingClientRect()
-      const viewportHeight = window.innerHeight
+      const viewportH = window.innerHeight
 
-      // Track relative to when the top of the container enters the viewport
-      // up until the bottom leaves the viewport
-      const start = rect.top - viewportHeight
-      const end = rect.bottom
-      const totalRange = end - start
+      // Triggers the animation start right as the container rolls into view,
+      // and advances progress dynamically across all row items.
+      const startTrigger = rect.top - (viewportH * 0.7)
+      const endTrigger = rect.bottom - (viewportH * 0.3)
+      const totalDistance = endTrigger - startTrigger
 
-      if (totalRange <= 0) return
+      if (totalDistance <= 0) return
 
-      const currentPos = -start
-      let progress = currentPos / totalRange
-
-      // Clamp progress precisely between 0 and 1
+      // Invert progress calculation so scrolling down reveals the line smoothly
+      let progress = 1 - (endTrigger / totalDistance)
       progress = Math.min(Math.max(progress, 0), 1)
 
-      // Animate stroke smoothly down the screen
       pathRef.current.style.strokeDashoffset = String(length * (1 - progress))
     }
 
     window.addEventListener("scroll", handleScroll, { passive: true })
     window.addEventListener("resize", handleScroll)
-    
+
     handleScroll()
 
     return () => {
@@ -98,7 +91,7 @@ export default function ScrollFilament({ className = "", strokeWidth = 4 }) {
           stroke: "hsl(var(--el-filament))",
           strokeDasharray: `${length} ${length}`,
           strokeDashoffset: length,
-          transition: "stroke-dashoffset 0.15s ease-out",
+          transition: "stroke-dashoffset 0.1s ease-out",
         }}
       />
     </svg>
