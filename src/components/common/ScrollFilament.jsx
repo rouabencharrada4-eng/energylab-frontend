@@ -36,16 +36,19 @@ export default function ScrollFilament({ className = "", strokeWidth = 4 }) {
       const rect = parent.getBoundingClientRect()
       const viewportH = window.innerHeight
 
-      // Triggers the animation start right as the container rolls into view,
-      // and advances progress dynamically across all row items.
-      const startTrigger = rect.top - (viewportH * 0.7)
-      const endTrigger = rect.bottom - (viewportH * 0.3)
-      const totalDistance = endTrigger - startTrigger
+      // Progress tracks the container as it passes through the viewport:
+      //  - 0 when its top crosses the "start" line (near the bottom of the screen)
+      //  - 1 when its bottom crosses the "end" line (near the top of the screen)
+      // Because it's derived from rect.top only, it's monotonic and reversible,
+      // so scrolling up and down both land on the same fill amount.
+      const start = viewportH * 0.85
+      const end = viewportH * 0.15
+      const totalDistance = rect.height + (start - end)
 
       if (totalDistance <= 0) return
 
-      // Invert progress calculation so scrolling down reveals the line smoothly
-      let progress = 1 - (endTrigger / totalDistance)
+      const scrolled = start - rect.top
+      let progress = scrolled / totalDistance
       progress = Math.min(Math.max(progress, 0), 1)
 
       pathRef.current.style.strokeDashoffset = String(length * (1 - progress))
