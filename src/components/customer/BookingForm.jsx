@@ -6,9 +6,10 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useServices, useCoaches, useTimeSlots } from "@/hooks/useServices"
 import TimeSlotCalendar from "@/components/customer/TimeSlotCalendar"
-// A phone number is considered valid if it has at least 8 digits,
-// optionally prefixed with + and containing spaces/dashes/parentheses.
-const PHONE_REGEX = /^\+?[0-9\s()-]{8,20}$/
+// Tunisian phone numbers have exactly 8 digits, optionally prefixed with
+// the 216 country code (with or without a leading +). Spaces, dashes and
+// parentheses are allowed for readability but are stripped before counting.
+const PHONE_REGEX = /^(?:216)?\d{8}$/
 
 export default function BookingForm({ onSubmit, loading }) {
   const { services, loading: servicesLoading, error: servicesError }  = useServices()
@@ -30,7 +31,8 @@ export default function BookingForm({ onSubmit, loading }) {
   const selectedService  = services.find(s => s.id === serviceId)
   const filteredCoaches  = coaches.filter(c => c.services?.some(s => s.id === serviceId))
 
-  const phoneValid   = PHONE_REGEX.test(phone.trim())
+  const phoneDigits  = phone.trim().replace(/[\s()-]/g, "").replace(/^\+/, "")
+  const phoneValid   = PHONE_REGEX.test(phoneDigits)
   const phoneInvalid = phoneTouched && !phoneValid
 
   // Only Private Coaching and Pilates can be booked through this form —
@@ -108,7 +110,7 @@ export default function BookingForm({ onSubmit, loading }) {
         />
         {phoneInvalid && (
           <p className="text-sm text-destructive">
-            Please enter a valid phone number so we can reach you about this booking.
+            Please enter a valid 8-digit phone number so we can reach you about this booking.
           </p>
         )}
       </div>
