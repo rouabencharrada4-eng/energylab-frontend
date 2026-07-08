@@ -27,7 +27,14 @@ export default function AdminBookings() {
           onChange={e => setSearch(e.target.value)}
           className="max-w-xs"
         />
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
+        <Select
+          items={["all", "pending", "accepted", "rejected", "cancelled"].map(s => ({
+            value: s,
+            label: s.charAt(0).toUpperCase() + s.slice(1),
+          }))}
+          value={statusFilter}
+          onValueChange={setStatusFilter}
+        >
           <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
           <SelectContent>
             {["all", "pending", "accepted", "rejected", "cancelled"].map(s => (

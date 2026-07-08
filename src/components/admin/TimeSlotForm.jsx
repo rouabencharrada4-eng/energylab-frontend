@@ -76,7 +76,14 @@ export default function TimeSlotForm({ open, onClose, onSave, initial = null }) 
         <div className="space-y-4">
           <div className="space-y-1.5">
             <Label>Service</Label>
-            <Select value={form.service_id} onValueChange={v => set("service_id", v)}>
+            {/* Base UI's <Select.Value> only shows a label if it can look one up
+                via the `items` prop on <Select.Root> — without it, it falls back
+                to rendering the raw `value` (the service's UUID). */}
+            <Select
+              items={services.filter(s => s.is_active).map(s => ({ value: s.id, label: s.name }))}
+              value={form.service_id}
+              onValueChange={v => set("service_id", v)}
+            >
               <SelectTrigger className="w-full"><SelectValue placeholder="Select a service" /></SelectTrigger>
               <SelectContent>
                 {services.filter(s => s.is_active).map(s => (
@@ -89,7 +96,11 @@ export default function TimeSlotForm({ open, onClose, onSave, initial = null }) 
           {selectedService?.requires_coach && (
             <div className="space-y-1.5">
               <Label>Coach (optional)</Label>
-              <Select value={form.coach_id} onValueChange={v => set("coach_id", v)}>
+              <Select
+                items={[{ value: "", label: "Any" }, ...coaches.map(c => ({ value: c.id, label: c.full_name }))]}
+                value={form.coach_id}
+                onValueChange={v => set("coach_id", v)}
+              >
                 <SelectTrigger className="w-full"><SelectValue placeholder="Any available coach" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">Any</SelectItem>

@@ -43,7 +43,11 @@ export default function AdminTimeSlots() {
         </Button>
       </div>
 
-      <Select value={serviceFilter} onValueChange={setServiceFilter}>
+      <Select
+        items={[{ value: "all", label: "All services" }, ...services.map(s => ({ value: s.id, label: s.name }))]}
+        value={serviceFilter}
+        onValueChange={setServiceFilter}
+      >
         <SelectTrigger className="w-56"><SelectValue /></SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All services</SelectItem>
