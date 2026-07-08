@@ -95,7 +95,7 @@ export default function ScrollFilament({ className = "", strokeWidth = 5 }) {
         strokeLinecap="round"
         vectorEffect="non-scaling-stroke"
         style={{
-          stroke: "hsl(var(--filament))",
+          stroke: "hsl(var(--el-filament))",
           strokeDasharray: length,
           strokeDashoffset: length,
         }}
