@@ -83,16 +83,8 @@ export const announcementsApi = {
 }
 
 export const siteContentApi = {
-  get:         ()             => api.get("/site-content"),
-  update:      (values)       => api.put("/site-content", { values }),
-  uploadImage: (key, file) => {
-    const form = new FormData()
-    form.append("file", file)
-    return api.post(`/site-content/image?key=${encodeURIComponent(key)}`, form, {
-      headers: { "Content-Type": "multipart/form-data" },
-    })
-  },
-  deleteValue: (key) => api.delete(`/site-content/${encodeURIComponent(key)}`),
+  get:    ()       => api.get("/site-content"),
+  update: (values) => api.put("/site-content", { values }),
 }
 
 export const galleryApi = {

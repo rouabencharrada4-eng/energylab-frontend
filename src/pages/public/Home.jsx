@@ -19,11 +19,12 @@ const DEFAULT_CONTENT = {
   logo_url: "/assets/logo-mark.png",
 
   about_heading: "About Us",
-  about_paragraph_1: "Welcome to Energy Lab—a space where movement, wellness, and mindfulness come together.",
-  about_paragraph_2: "We believe true strength is built through intention, not intensity. Every Pilates session is thoughtfully designed around controlled movement and mindful breathing, helping you strengthen your body, improve mobility, and cultivate lasting balance.",
-  about_paragraph_3: "From private coaching and group classes to InBody assessments, every experience is tailored to support your individual journey. Our studio offers a peaceful, modern environment where you can disconnect from the pace of everyday life and reconnect with yourself.",
-  about_paragraph_4: "At Energy Lab, wellness isn't just a workout—it's a way of living.",
-  about_image_url: "/assets/about_us.png",
+  about_text: [
+    "Welcome to Energy Lab—a space where movement, wellness, and mindfulness come together.",
+    "We believe true strength is built through intention, not intensity. Every Pilates session is thoughtfully designed around controlled movement and mindful breathing, helping you strengthen your body, improve mobility, and cultivate lasting balance.",
+    "From private coaching and group classes to InBody assessments, every experience is tailored to support your individual journey. Our studio offers a peaceful, modern environment where you can disconnect from the pace of everyday life and reconnect with yourself.",
+    "At Energy Lab, wellness isn't just a workout—it's a way of living.",
+  ].join("\n\n"),
 
   space_heading: "Our Space",
   space_subheading: "A quiet, modern studio designed for focus — here's a glimpse before you visit.",
@@ -229,12 +230,12 @@ export default function Home() {
       .catch(() => {})
   }, [])
 
-  const aboutParagraphs = [
-    content.about_paragraph_1,
-    content.about_paragraph_2,
-    content.about_paragraph_3,
-    content.about_paragraph_4,
-  ].filter(Boolean)
+  // Admin edits this as one text area; a blank line between lines of text
+  // is what breaks it into separate <p> paragraphs below.
+  const aboutParagraphs = (content.about_text || "")
+    .split(/\n\s*\n/)
+    .map(p => p.trim())
+    .filter(Boolean)
 
   const contactInfo = [
     { icon: MapPin, label: "Location", value: content.contact_location },
@@ -310,7 +311,7 @@ export default function Home() {
           <div className="relative mx-auto md:mx-0 w-full max-w-sm">
             <div className="rounded-2xl border-2 border-primary p-3">
               <img
-                src={content.about_image_url}
+                src="/assets/about_us.png"
                 alt="Inside Energy Lab"
                 className="w-full h-[420px] object-cover rounded-lg"
               />
