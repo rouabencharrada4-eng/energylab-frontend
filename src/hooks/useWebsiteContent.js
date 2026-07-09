@@ -31,7 +31,16 @@ export function useSiteContent() {
     setValues(v => ({ ...v, [res.data.key]: res.data.url }))
   }
 
-  return { values, loading, error, refetch: fetchContent, saveValues, uploadImage }
+  const resetValue = async (key) => {
+    await siteContentApi.deleteValue(key)
+    setValues(v => {
+      const next = { ...v }
+      delete next[key]
+      return next
+    })
+  }
+
+  return { values, loading, error, refetch: fetchContent, saveValues, uploadImage, resetValue }
 }
 
 export function useGallery() {

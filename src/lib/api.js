@@ -92,6 +92,7 @@ export const siteContentApi = {
       headers: { "Content-Type": "multipart/form-data" },
     })
   },
+  deleteValue: (key) => api.delete(`/site-content/${encodeURIComponent(key)}`),
 }
 
 export const galleryApi = {
