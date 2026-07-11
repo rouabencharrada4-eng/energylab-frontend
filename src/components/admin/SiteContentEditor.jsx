@@ -1,39 +1,26 @@
 // src/components/admin/SiteContentEditor.jsx
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { Upload, Loader2, Save } from "lucide-react"
+import { Loader2, Save } from "lucide-react"
 
 // key -> label, for every text field the admin can edit.
 // Grouped into sections purely for layout; the backend just stores flat key/value pairs.
+//
+// Deliberately NOT editable here (kept fixed in code):
+//   - Hero (title/tagline/background image)
+//   - About image (about_us.png)
+//   - Our Space heading/subheading — photos for this section are managed
+//     from the separate "Gallery" tab instead
+//   - Branding (logo)
 const SECTIONS = [
-  {
-    title: "Hero",
-    fields: [
-      { key: "hero_title_line1", label: "Title — line 1" },
-      { key: "hero_title_line2", label: "Title — line 2" },
-      { key: "hero_tagline", label: "Tagline" },
-    ],
-    images: [{ key: "hero_bg_url", label: "Background image" }],
-  },
   {
     title: "About",
     fields: [
       { key: "about_heading", label: "Section label" },
-      { key: "about_paragraph_1", label: "Paragraph 1", area: true },
-      { key: "about_paragraph_2", label: "Paragraph 2", area: true },
-      { key: "about_paragraph_3", label: "Paragraph 3", area: true },
-      { key: "about_paragraph_4", label: "Paragraph 4", area: true },
-    ],
-    images: [{ key: "about_image_url", label: "About image" }],
-  },
-  {
-    title: "Our Space",
-    fields: [
-      { key: "space_heading", label: "Heading" },
-      { key: "space_subheading", label: "Subheading", area: true },
+      { key: "about_text", label: "Paragraph", area: true },
     ],
   },
   {
@@ -45,50 +32,9 @@ const SECTIONS = [
       { key: "map_query", label: "Map search query (address or 'lat,lng')" },
     ],
   },
-  {
-    title: "Branding",
-    images: [{ key: "logo_url", label: "Logo" }],
-  },
 ]
 
-function ImageField({ fieldKey, label, value, onUpload }) {
-  const [uploading, setUploading] = useState(false)
-  const inputRef = useRef(null)
-
-  const handleFile = async (e) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setUploading(true)
-    try {
-      await onUpload(fieldKey, file)
-    } finally {
-      setUploading(false)
-      e.target.value = ""
-    }
-  }
-
-  return (
-    <div className="space-y-1.5">
-      <Label>{label}</Label>
-      <div className="flex items-center gap-3">
-        <div className="h-16 w-16 rounded-md border border-border/60 overflow-hidden shrink-0 bg-muted flex items-center justify-center">
-          {value ? (
-            <img src={value} alt={label} className="h-full w-full object-cover" />
-          ) : (
-            <span className="text-[10px] text-muted-foreground">None</span>
-          )}
-        </div>
-        <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleFile} />
-        <Button type="button" variant="outline" size="sm" disabled={uploading} onClick={() => inputRef.current?.click()} className="gap-1.5">
-          {uploading ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />}
-          {uploading ? "Uploading..." : "Replace"}
-        </Button>
-      </div>
-    </div>
-  )
-}
-
-export default function SiteContentEditor({ values, loading, saveValues, uploadImage }) {
+export default function SiteContentEditor({ values, loading, saveValues }) {
   const [form, setForm] = useState({})
   const [saving, setSaving] = useState(false)
   const [dirty, setDirty] = useState(false)
@@ -113,11 +59,6 @@ export default function SiteContentEditor({ values, loading, saveValues, uploadI
     }
   }
 
-  const handleImageUpload = async (key, file) => {
-    await uploadImage(key, file)
-    setDirty(false)
-  }
-
   if (loading) return <p className="text-muted-foreground text-sm">Loading...</p>
 
   return (
@@ -140,15 +81,11 @@ export default function SiteContentEditor({ values, loading, saveValues, uploadI
             <div key={key} className="space-y-1.5">
               <Label>{label}</Label>
               {area ? (
-                <Textarea value={form[key] ?? ""} onChange={e => set(key, e.target.value)} rows={3} />
+                <Textarea value={form[key] ?? ""} onChange={e => set(key, e.target.value)} rows={key === "about_text" ? 8 : 3} />
               ) : (
                 <Input value={form[key] ?? ""} onChange={e => set(key, e.target.value)} />
               )}
             </div>
-          ))}
-
-          {section.images?.map(({ key, label }) => (
-            <ImageField key={key} fieldKey={key} label={label} value={form[key]} onUpload={handleImageUpload} />
           ))}
         </div>
       ))}

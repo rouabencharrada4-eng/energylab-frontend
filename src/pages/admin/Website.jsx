@@ -50,7 +50,6 @@ export default function AdminWebsite() {
           values={content.values}
           loading={content.loading}
           saveValues={content.saveValues}
-          uploadImage={content.uploadImage}
         />
       )}
 
