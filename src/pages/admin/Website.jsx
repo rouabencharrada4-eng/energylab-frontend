@@ -1,23 +1,20 @@
 // src/pages/admin/Website.jsx
 import { useState } from "react"
-import { useSiteContent, useGallery, useShowcase } from "@/hooks/useWebsiteContent"
+import { useSiteContent, useGallery } from "@/hooks/useWebsiteContent"
 import SiteContentEditor from "@/components/admin/SiteContentEditor"
 import GalleryManager from "@/components/admin/GalleryManager"
-import ShowcaseManager from "@/components/admin/ShowcaseManager"
 import { cn } from "@/lib/utils"
 
 const TABS = [
-  { id: "content",  label: "Page Content" },
-  { id: "gallery",  label: "Gallery" },
-  { id: "showcase", label: "What We Offer" },
+  { id: "content", label: "Page Content" },
+  { id: "gallery", label: "Gallery" },
 ]
 
 export default function AdminWebsite() {
   const [tab, setTab] = useState("content")
 
-  const content  = useSiteContent()
-  const gallery  = useGallery()
-  const showcase = useShowcase()
+  const content = useSiteContent()
+  const gallery = useGallery()
 
   return (
     <div className="space-y-6">
@@ -61,18 +58,6 @@ export default function AdminWebsite() {
           updateImage={gallery.updateImage}
           removeImage={gallery.removeImage}
           reorder={gallery.reorder}
-        />
-      )}
-
-      {tab === "showcase" && (
-        <ShowcaseManager
-          items={showcase.items}
-          loading={showcase.loading}
-          createItem={showcase.createItem}
-          updateItem={showcase.updateItem}
-          removeItem={showcase.removeItem}
-          uploadImage={showcase.uploadImage}
-          reorder={showcase.reorder}
         />
       )}
     </div>

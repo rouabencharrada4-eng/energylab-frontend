@@ -1,6 +1,6 @@
 // src/hooks/useWebsiteContent.js
 import { useState, useEffect, useCallback } from "react"
-import { siteContentApi, galleryApi, showcaseApi } from "@/lib/api"
+import { siteContentApi, galleryApi } from "@/lib/api"
 
 export function useSiteContent() {
   const [values, setValues] = useState({})
@@ -78,59 +78,4 @@ export function useGallery() {
   }
 
   return { images, loading, error, refetch: fetchImages, addImage, updateImage, removeImage, reorder }
-}
-
-export function useShowcase() {
-  const [items, setItems] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-
-  const fetchItems = useCallback(async () => {
-    try {
-      setLoading(true)
-      const res = await showcaseApi.getAll()
-      setItems(res.data)
-    } catch (err) {
-      setError(err.response?.data?.detail || "Failed to load showcase items")
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => { fetchItems() }, [fetchItems])
-
-  const createItem = async (data) => {
-    await showcaseApi.create(data)
-    await fetchItems()
-  }
-
-  const updateItem = async (id, data) => {
-    await showcaseApi.update(id, data)
-    await fetchItems()
-  }
-
-  const removeItem = async (id) => {
-    await showcaseApi.remove(id)
-    await fetchItems()
-  }
-
-  const uploadImage = async (id, file) => {
-    await showcaseApi.uploadImage(id, file)
-    await fetchItems()
-  }
-
-  const reorder = async (id, direction) => {
-    const idx = items.findIndex(i => i.id === id)
-    const swapIdx = direction === "up" ? idx - 1 : idx + 1
-    if (idx === -1 || swapIdx < 0 || swapIdx >= items.length) return
-    const a = items[idx]
-    const b = items[swapIdx]
-    await Promise.all([
-      showcaseApi.update(a.id, { sort_order: b.sort_order }),
-      showcaseApi.update(b.id, { sort_order: a.sort_order }),
-    ])
-    await fetchItems()
-  }
-
-  return { items, loading, error, refetch: fetchItems, createItem, updateItem, removeItem, uploadImage, reorder }
 }
