@@ -13,13 +13,42 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Loader2 } from "lucide-react"
 
+function GoogleIcon(props) {
+  return (
+    <svg viewBox="0 0 48 48" width="18" height="18" {...props}>
+      <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/>
+      <path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/>
+      <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/>
+      <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/>
+    </svg>
+  )
+}
+
+function FacebookIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" {...props}>
+      <path d="M22 12.06C22 6.505 17.523 2 12 2S2 6.505 2 12.06c0 5.022 3.657 9.184 8.438 9.94v-7.03H7.898v-2.91h2.54V9.845c0-2.508 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.462h-1.26c-1.243 0-1.63.771-1.63 1.562v1.877h2.773l-.443 2.91h-2.33V22c4.78-.756 8.437-4.918 8.437-9.94z"/>
+    </svg>
+  )
+}
+
 const OAUTH_PROVIDERS = [
-  { strategy: "oauth_google",   label: "Google"   },
-  { strategy: "oauth_facebook", label: "Facebook" },
+  {
+    strategy: "oauth_google",
+    label: "Continue with Google",
+    icon: GoogleIcon,
+    className: "bg-white text-gray-800 border border-gray-300 hover:bg-gray-50",
+  },
+  {
+    strategy: "oauth_facebook",
+    label: "Continue with Facebook",
+    icon: FacebookIcon,
+    className: "bg-[#1877F2] text-white hover:bg-[#1877F2]/90",
+  },
 ]
 
 const EMPTY_SIGN_IN = { email: "", password: "" }
-const EMPTY_SIGN_UP = { firstName: "", lastName: "", email: "", password: "", phone: "", address: "" }
+const EMPTY_SIGN_UP = { firstName: "", lastName: "", email: "", password: "", confirmPassword: "", phone: "", address: "" }
 
 // Turns Clerk's error shape into a plain, readable message.
 function readError(err, fallback) {
@@ -100,6 +129,10 @@ export function AuthModal({ open, onOpenChange, defaultMode = "sign-in" }) {
   const handleSignUp = async (e) => {
     e.preventDefault()
     if (!signUpLoaded) return
+    if (signUpForm.password !== signUpForm.confirmPassword) {
+      setError("Passwords don't match.")
+      return
+    }
     setLoading(true)
     setError("")
     try {
@@ -147,19 +180,22 @@ export function AuthModal({ open, onOpenChange, defaultMode = "sign-in" }) {
   }
 
   const OAuthRow = (
-    <div className="grid grid-cols-2 gap-2">
-      {OAUTH_PROVIDERS.map(p => (
-        <Button
-          key={p.strategy}
-          type="button"
-          variant="outline"
-          size="sm"
-          disabled={oauthLoading !== null}
-          onClick={() => handleOAuth(p.strategy)}
-        >
-          {oauthLoading === p.strategy ? <Loader2 size={14} className="animate-spin" /> : p.label}
-        </Button>
-      ))}
+    <div className="flex flex-col gap-2">
+      {OAUTH_PROVIDERS.map(p => {
+        const Icon = p.icon
+        return (
+          <button
+            key={p.strategy}
+            type="button"
+            disabled={oauthLoading !== null}
+            onClick={() => handleOAuth(p.strategy)}
+            className={`w-full h-10 rounded-md text-sm font-medium flex items-center justify-center gap-2.5 transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${p.className}`}
+          >
+            {oauthLoading === p.strategy ? <Loader2 size={16} className="animate-spin" /> : <Icon />}
+            {p.label}
+          </button>
+        )
+      })}
     </div>
   )
 
@@ -268,6 +304,15 @@ export function AuthModal({ open, onOpenChange, defaultMode = "sign-in" }) {
                   required
                   value={signUpForm.password}
                   onChange={e => setSignUpForm(f => ({ ...f, password: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Confirm password</Label>
+                <Input
+                  type="password"
+                  required
+                  value={signUpForm.confirmPassword}
+                  onChange={e => setSignUpForm(f => ({ ...f, confirmPassword: e.target.value }))}
                 />
               </div>
               <div className="space-y-1.5">
