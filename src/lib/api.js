@@ -105,4 +105,16 @@ export const showcaseApi = {
   getPublic: () => api.get("/showcase"),
 }
 
+export const eventsApi = {
+  getActive: ()         => api.get("/events/active"),
+  getAll:    ()         => api.get("/events"),
+  create:    (data)     => api.post("/events", data),
+  update:    (id, data) => api.put(`/events/${id}`, data),
+  remove:    (id)       => api.delete(`/events/${id}`),
+  uploadImage: (id, file) => {
+    const form = new FormData()
+    form.append("file", file)
+    return api.post(`/events/${id}/image`, form, { headers: { "Content-Type": "multipart/form-data" } })
+  },
+}
 export default api

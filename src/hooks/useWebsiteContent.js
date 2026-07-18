@@ -1,6 +1,6 @@
 // src/hooks/useWebsiteContent.js
 import { useState, useEffect, useCallback } from "react"
-import { siteContentApi, galleryApi } from "@/lib/api"
+import { siteContentApi, galleryApi, eventsApi } from "@/lib/api"
 
 export function useSiteContent() {
   const [values, setValues] = useState({})
@@ -78,4 +78,46 @@ export function useGallery() {
   }
 
   return { images, loading, error, refetch: fetchImages, addImage, updateImage, removeImage, reorder }
+}
+
+export function useEvents() {
+  const [events, setEvents] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  const fetchEvents = useCallback(async () => {
+    try {
+      setLoading(true)
+      const res = await eventsApi.getAll()
+      setEvents(res.data)
+    } catch (err) {
+      setError(err.response?.data?.detail || "Failed to load events")
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { fetchEvents() }, [fetchEvents])
+
+  const createEvent = async (data) => {
+    await eventsApi.create(data)
+    await fetchEvents()
+  }
+
+  const updateEvent = async (id, data) => {
+    await eventsApi.update(id, data)
+    await fetchEvents()
+  }
+
+  const removeEvent = async (id) => {
+    await eventsApi.remove(id)
+    await fetchEvents()
+  }
+
+  const uploadImage = async (id, file) => {
+    await eventsApi.uploadImage(id, file)
+    await fetchEvents()
+  }
+
+  return { events, loading, error, refetch: fetchEvents, createEvent, updateEvent, removeEvent, uploadImage }
 }

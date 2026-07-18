@@ -18,6 +18,7 @@ import AdminServices      from "@/pages/admin/Services"
 import AdminWebsite       from "@/pages/admin/Website"
 import AdminUsers         from "@/pages/admin/Users"
 import AdminAnnouncements from "@/pages/admin/Announcements"
+import AdminEvents        from "@/pages/admin/Events"
 
 import CustomerDashboard from "@/pages/customer/Dashboard"
 import BookingNew        from "@/pages/customer/BookingNew"
@@ -81,6 +82,9 @@ export default function App() {
           } />
           <Route path="/admin/website" element={
             <ProtectedRoute requireAdmin><AdminLayout><AdminWebsite /></AdminLayout></ProtectedRoute>
+          } />
+          <Route path="/admin/events" element={
+            <ProtectedRoute requireAdmin><AdminLayout><AdminEvents /></AdminLayout></ProtectedRoute>
           } />
           <Route path="/admin/users" element={
             <ProtectedRoute requireAdmin><AdminLayout><AdminUsers /></AdminLayout></ProtectedRoute>
