@@ -1,6 +1,6 @@
 // src/App.jsx
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
-import { ClerkProvider } from "@clerk/clerk-react"
+import { ClerkProvider, AuthenticateWithRedirectCallback } from "@clerk/clerk-react"
 
 import Navbar              from "@/components/layout/Navbar"
 import Footer              from "@/components/layout/Footer"
@@ -52,6 +52,9 @@ export default function App() {
         <Routes>
           {/* Public — single-page vitrine, everything lives on "/" as sections */}
           <Route path="/" element={<Home />} />
+
+          {/* Google/Facebook sign-in bounces through here on its way back */}
+          <Route path="/sso-callback" element={<AuthenticateWithRedirectCallback />} />
 
           {/* Old bookmarks/links still resolve — they just land on the section */}
           <Route path="/services" element={<Navigate to="/#services" replace />} />

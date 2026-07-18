@@ -1,4 +1,3 @@
-
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { formatDate } from "@/lib/utils"
 
@@ -14,6 +13,7 @@ export default function UserTable({ users, loading }) {
           <TableHead>Name</TableHead>
           <TableHead>Email</TableHead>
           <TableHead>Phone</TableHead>
+          <TableHead>Address</TableHead>
           <TableHead>Role</TableHead>
           <TableHead>Joined</TableHead>
         </TableRow>
@@ -21,7 +21,7 @@ export default function UserTable({ users, loading }) {
       <TableBody>
         {users.length === 0 && (
           <TableRow>
-            <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+            <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
               No users found.
             </TableCell>
           </TableRow>
@@ -31,6 +31,7 @@ export default function UserTable({ users, loading }) {
             <TableCell className="font-medium text-sm">{u.full_name}</TableCell>
             <TableCell className="text-sm text-muted-foreground">{u.email}</TableCell>
             <TableCell className="text-sm text-muted-foreground">{u.phone ?? "—"}</TableCell>
+            <TableCell className="text-sm text-muted-foreground">{u.address ?? "—"}</TableCell>
             <TableCell>
               <span className={`text-xs px-2 py-1 rounded-full font-medium ${
                 u.role === "admin"

@@ -1,6 +1,8 @@
+import { useState } from "react"
 import { Link, useLocation } from "react-router-dom"
-import { useUser, UserButton, SignInButton } from "@clerk/clerk-react"
+import { useUser, UserButton } from "@clerk/clerk-react"
 import { Button } from "@/components/ui/button"
+import { AuthModal } from "@/components/auth/AuthModal"
 
 const publicLinks = [
   { hash: "#hero",     label: "Home"      },
@@ -34,6 +36,7 @@ function NavAnchor({ hash, label, className }) {
 export default function Navbar() {
   const { isSignedIn, user } = useUser()
   const isAdmin = user?.publicMetadata?.role === "admin"
+  const [authOpen, setAuthOpen] = useState(false)
 
   return (
     <header
@@ -75,15 +78,19 @@ export default function Navbar() {
           {isSignedIn ? (
             <UserButton afterSignOutUrl="/" />
           ) : (
-            <SignInButton mode="modal">
-              <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                Sign In
-              </Button>
-            </SignInButton>
+            <Button
+              size="sm"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              onClick={() => setAuthOpen(true)}
+            >
+              Sign In
+            </Button>
           )}
         </div>
 
       </div>
+
+      <AuthModal open={authOpen} onOpenChange={setAuthOpen} defaultMode="sign-in" />
     </header>
   )
 }
