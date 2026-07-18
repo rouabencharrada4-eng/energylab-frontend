@@ -9,6 +9,7 @@ import AnnouncementBanner  from "@/components/common/AnnouncementBanner"
 import { ProtectedRoute }  from "@/components/common/ProtectedRoute"
 
 import Home from "@/pages/public/Home"
+import Privacy from "@/pages/public/Privacy"
 
 import AdminDashboard     from "@/pages/admin/Dashboard"
 import AdminBookings      from "@/pages/admin/Bookings"
@@ -52,6 +53,7 @@ export default function App() {
         <Routes>
           {/* Public — single-page vitrine, everything lives on "/" as sections */}
           <Route path="/" element={<Home />} />
+          <Route path="/privacy" element={<Privacy />} />
 
           {/* Google/Facebook sign-in bounces through here on its way back */}
           <Route path="/sso-callback" element={<AuthenticateWithRedirectCallback />} />

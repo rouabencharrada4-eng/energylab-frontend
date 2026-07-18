@@ -81,10 +81,13 @@ export default function Footer() {
       </div>
 
       <div className="border-t border-border/60">
-        <div className="max-w-7xl mx-auto px-6 py-5 text-center">
+        <div className="max-w-7xl mx-auto px-6 py-5 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4">
           <p className="text-xs text-muted-foreground">
             © {new Date().getFullYear()} Energy Lab. All rights reserved.
           </p>
+          <Link to="/privacy" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+            Privacy Policy
+          </Link>
         </div>
       </div>
     </footer>
