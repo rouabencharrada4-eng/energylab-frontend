@@ -1,5 +1,5 @@
 // src/pages/public/Home.jsx
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useLocation, Link } from "react-router-dom"
 import { SignInButton, useUser } from "@clerk/clerk-react"
 import { Button } from "@/components/ui/button"
@@ -78,11 +78,18 @@ const DEFAULT_GALLERY = [
 ]
 
 function useReveal() {
-  const ref = useRef(null)
+  const [node, setNode] = useState(null)
   const [visible, setVisible] = useState(false)
 
+  // Callback ref instead of useRef: sections like the event card mount late
+  // (only once the async fetch resolves), so a plain useRef's effect would
+  // run before the DOM node exists and never observe it. A callback ref
+  // fires whenever the node actually attaches, no matter when that happens.
+  const ref = useCallback((node) => {
+    setNode(node)
+  }, [])
+
   useEffect(() => {
-    const node = ref.current
     if (!node) return
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -95,7 +102,7 @@ function useReveal() {
     )
     observer.observe(node)
     return () => observer.disconnect()
-  }, [])
+  }, [node])
 
   return [ref, visible]
 }
@@ -190,30 +197,36 @@ function SpaceCarousel({ gallery }) {
       <div className="overflow-hidden flex flex-col gap-4">
         <div className="flex" onMouseEnter={pauseAnim} onMouseLeave={resumeAnim}>
           <div
-            className="flex gap-[14px]"
-            style={{ animation: "marquee-left 32s linear infinite" }}
+            className="flex gap-4 shrink-0"
+            style={{ animation: "scroll-left 40s linear infinite" }}
           >
-            {row1.map((g, i) => (
-              <GalleryTile key={i} src={g.image_url} caption={g.caption} />
+            {row1.map((img, i) => (
+              <GalleryTile key={i} src={img.image_url} caption={img.caption} />
             ))}
           </div>
         </div>
-
         <div className="flex" onMouseEnter={pauseAnim} onMouseLeave={resumeAnim}>
           <div
-            className="flex gap-[14px]"
-            style={{ animation: "marquee-right 32s linear infinite" }}
+            className="flex gap-4 shrink-0"
+            style={{ animation: "scroll-right 40s linear infinite" }}
           >
-            {row2.map((g, i) => (
-              <GalleryTile key={i} src={g.image_url} caption={g.caption} />
+            {row2.map((img, i) => (
+              <GalleryTile key={i} src={img.image_url} caption={img.caption} />
             ))}
           </div>
         </div>
       </div>
 
-      <p className="text-center mt-5 text-[10px] uppercase tracking-widest text-muted-foreground/40">
-        Hover to pause
-      </p>
+      <style>{`
+        @keyframes scroll-left {
+          from { transform: translateX(0); }
+          to { transform: translateX(-50%); }
+        }
+        @keyframes scroll-right {
+          from { transform: translateX(-50%); }
+          to { transform: translateX(0); }
+        }
+      `}</style>
     </div>
   )
 }
