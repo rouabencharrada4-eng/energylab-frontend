@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Mail, MapPin, Phone } from "lucide-react"
 import ScrollFilament from "@/components/common/ScrollFilament"
 import { siteContentApi, galleryApi, showcaseApi, eventsApi } from "@/lib/api"
+import EventSpotlight from "@/components/common/EventSpotlight"
 
 // Everything below is served from the admin-editable backend (Website tab in
 // the admin dashboard). These DEFAULT_* values are only a fallback so the
@@ -328,37 +329,10 @@ export default function Home() {
         </div>
       </section>
 
-      {event && (
-        <section id="event" className="max-w-5xl mx-auto px-6 pt-20 pb-4 scroll-mt-16">
-          <div
-            ref={eventRef}
-            className={`rounded-2xl border-2 border-primary overflow-hidden grid md:grid-cols-2 transition-all duration-700 ease-out ${
-              eventVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-            }`}
-          >
-            {event.image_url && (
-              <div className="h-56 md:h-full">
-                <img src={event.image_url} alt={event.title} className="w-full h-full object-cover" />
-              </div>
-            )}
-            <div
-              className={`p-8 md:p-10 flex flex-col justify-center gap-3 ${
-                event.image_url ? "" : "md:col-span-2 text-center items-center"
-              }`}
-            >
-              <p className="text-xs uppercase tracking-widest text-accent">Upcoming Event</p>
-              <h3 className="text-2xl md:text-3xl font-display font-semibold">{event.title}</h3>
-              {event.event_date && (
-                <p className="text-sm text-primary font-medium">{formatEventDate(event.event_date)}</p>
-              )}
-              {event.description && (
-                <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line max-w-md">
-                  {event.description}
-                </p>
-              )}
-            </div>
-          </div>
-        </section>
+     {event && (
+       <section id="event" className="max-w-5xl mx-auto px-6 pt-20 pb-4 scroll-mt-16">
+       <EventSpotlight event={event} eventRef={eventRef} visible={eventVisible} />
+      </section>
       )}
 
       <section id="about" className="max-w-5xl mx-auto px-6 py-24 scroll-mt-16">

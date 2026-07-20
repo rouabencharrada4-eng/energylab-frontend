@@ -121,3 +121,64 @@
 .animate-fade-in {
   animation: fade-in 0.5s ease-out both;
 }
+
+/* ── Event spotlight (ticket card) ──────────────── */
+@property --event-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.event-glow::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 22px;
+  padding: 1px;
+  background: conic-gradient(
+    from var(--event-angle, 0deg),
+    hsl(var(--primary)), transparent 30%,
+    hsl(var(--accent) / 0.6) 55%, transparent 80%,
+    hsl(var(--primary))
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: event-rotate-glow 6s linear infinite;
+  pointer-events: none;
+}
+@keyframes event-rotate-glow { to { --event-angle: 360deg; } }
+
+.event-kenburns-wrap { position: relative; }
+.event-kenburns { animation: event-kb 14s ease-in-out infinite alternate; transform-origin: center; }
+@keyframes event-kb {
+  from { transform: scale(1); }
+  to   { transform: scale(1.1) translate(-1.5%, -1%); }
+}
+
+.event-perforation {
+  position: relative;
+  width: 0;
+  border-left: 2px dashed hsl(var(--border));
+}
+.event-perforation::before,
+.event-perforation::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  width: 22px;
+  height: 22px;
+  background: hsl(var(--background));
+  border-radius: 50%;
+  transform: translateX(-50%);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,.5);
+}
+.event-perforation::before { top: -11px; }
+.event-perforation::after  { bottom: -11px; }
+
+.event-live-dot { animation: event-pulse-dot 2s ease-out infinite; }
+@keyframes event-pulse-dot {
+  0%   { box-shadow: 0 0 0 0 hsl(var(--accent) / .55); }
+  70%  { box-shadow: 0 0 0 8px hsl(var(--accent) / 0); }
+  100% { box-shadow: 0 0 0 0 hsl(var(--accent) / 0); }
+}
