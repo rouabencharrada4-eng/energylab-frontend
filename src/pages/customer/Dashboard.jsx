@@ -31,8 +31,11 @@ export default function CustomerDashboard() {
           <h1 className="text-3xl font-display font-semibold">My Bookings</h1>
           <p className="text-muted-foreground text-sm mt-1">Welcome back, {user?.firstName}</p>
         </div>
-        <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground gap-2">
-          <Link to="/book"><Plus size={16} /> New Booking</Link>
+        <Button asChild className="rounded-full px-4 gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm">
+        <Link to="/book">
+        <Plus size={16} />
+        New Booking
+        </Link>
         </Button>
       </div>
 

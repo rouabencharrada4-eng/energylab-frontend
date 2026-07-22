@@ -1,3 +1,4 @@
+import { isValidElement, cloneElement } from "react"
 import { Button as ButtonPrimitive } from "@base-ui/react/button"
 import { cva } from "class-variance-authority";
 
@@ -44,13 +45,38 @@ function Button({
   className,
   variant = "default",
   size = "default",
+  asChild = false,
+  children,
   ...props
 }) {
+  const classes = cn(buttonVariants({ variant, size, className }))
+
+  if (asChild && isValidElement(children)) {
+    // Base UI's Button takes a `render` prop, not Radix's `asChild`/Slot.
+    // Passing a *function* here hands us the fully-computed button props
+    // (merged className, event handlers, ref, data-slot, etc.) and lets us
+    // spread them onto our own element ourselves — so the child's original
+    // content (icon + text inside a <Link>) is never rebuilt or stripped,
+    // it just gets the button's styling/behavior layered on top of it.
+    return (
+      <ButtonPrimitive
+        data-slot="button"
+        className={classes}
+        render={(htmlProps) =>
+          cloneElement(children, {
+            ...htmlProps,
+            className: cn(children.props.className, htmlProps.className),
+          })
+        }
+        {...props}
+      />
+    )
+  }
+
   return (
-    <ButtonPrimitive
-      data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
-      {...props} />
+    <ButtonPrimitive data-slot="button" className={classes} {...props}>
+      {children}
+    </ButtonPrimitive>
   );
 }
 
