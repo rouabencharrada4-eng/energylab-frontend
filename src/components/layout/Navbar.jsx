@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom"
 import { useUser, UserButton } from "@clerk/clerk-react"
 import { Button } from "@/components/ui/button"
 import { AuthModal } from "@/components/auth/AuthModal"
+import { ThemeToggle } from "@/components/common/ThemeToggle"
 
 const publicLinks = [
   { hash: "#hero",     label: "Home"      },
@@ -12,9 +13,6 @@ const publicLinks = [
   { hash: "#contact",  label: "Contact"   },
 ]
 
-// On the homepage this is a plain in-page anchor (smooth-scrolled via CSS).
-// From any other page (e.g. /dashboard) it's a router Link back to "/",
-// and Home's own effect scrolls to the hash once it mounts.
 function NavAnchor({ hash, label, className }) {
   const location = useLocation()
   const onHome = location.pathname === "/"
@@ -46,9 +44,9 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
 
         <Link to="/" className="flex items-center gap-3">
-          {/* invert flips the black mark to white so it's actually
-              visible against the dark navbar */}
-          <img src="/assets/logo-mark.png" alt="Energy Lab" className="h-8 w-auto invert" />
+          {/* dark:invert flips the black mark to white, but only when the
+              navbar background is actually dark */}
+          <img src="/assets/logo-mark.png" alt="Energy Lab" className="h-8 w-auto dark:invert" />
           <span className="hidden sm:block text-lg font-display font-semibold tracking-wide">
             <span className="text-foreground">Energy</span>{" "}
             <span className="text-primary">Lab</span>
@@ -75,6 +73,7 @@ export default function Navbar() {
         </nav>
 
         <div className="flex items-center gap-3">
+          <ThemeToggle />
           {isSignedIn ? (
             <UserButton afterSignOutUrl="/" />
           ) : (

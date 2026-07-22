@@ -293,8 +293,8 @@ export default function Home() {
             alt=""
             className="h-full w-full object-cover opacity-70"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/10 via-primary/15 to-background/90" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_55%,hsl(var(--background)/0.85)_100%)]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-primary/15 to-black/90" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_55%,rgba(0,0,0,0.85)_100%)]" />
         </div>
 
         <div className="relative z-10 text-center max-w-3xl mx-auto px-6 space-y-8">

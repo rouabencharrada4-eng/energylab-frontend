@@ -53,8 +53,7 @@ export default function Footer() {
 
         {/* Brand */}
         <div className="flex items-center gap-3 sm:items-start sm:flex-col sm:gap-3">
-          <img src="/assets/logo-mark.png" alt="Energy Lab" className="h-7 w-auto invert" />
-          <span className="text-xs text-muted-foreground tracking-widest uppercase">
+        <img src="/assets/logo-mark.png" alt="Energy Lab" className="h-7 w-auto dark:invert" />          <span className="text-xs text-muted-foreground tracking-widest uppercase">
             Fitness · Wellness · Pilates
           </span>
         </div>
