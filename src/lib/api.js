@@ -118,3 +118,16 @@ export const eventsApi = {
   },
 }
 export default api
+
+export const heroImagesApi = {
+  getPublic: () => api.get("/hero-images"),
+  getAll:    () => api.get("/hero-images/all"),
+  add:       (file, sortOrder) => {
+    const form = new FormData()
+    form.append("file", file)
+    form.append("sort_order", sortOrder ?? 0)
+    return api.post("/hero-images", form, { headers: { "Content-Type": "multipart/form-data" } })
+  },
+  update: (id, data) => api.put(`/hero-images/${id}`, data),
+  remove: (id)       => api.delete(`/hero-images/${id}`),
+}

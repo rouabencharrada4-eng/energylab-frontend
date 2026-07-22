@@ -1,6 +1,6 @@
 // src/hooks/useWebsiteContent.js
 import { useState, useEffect, useCallback } from "react"
-import { siteContentApi, galleryApi, eventsApi } from "@/lib/api"
+import { siteContentApi, galleryApi, eventsApi, heroImagesApi } from "@/lib/api"
 
 export function useSiteContent() {
   const [values, setValues] = useState({})
@@ -73,6 +73,57 @@ export function useGallery() {
     await Promise.all([
       galleryApi.update(a.id, { sort_order: b.sort_order }),
       galleryApi.update(b.id, { sort_order: a.sort_order }),
+    ])
+    await fetchImages()
+  }
+
+  return { images, loading, error, refetch: fetchImages, addImage, updateImage, removeImage, reorder }
+}
+
+export function useHeroImages() {
+  const [images, setImages] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  const fetchImages = useCallback(async () => {
+    try {
+      setLoading(true)
+      const res = await heroImagesApi.getAll()
+      setImages(res.data)
+    } catch (err) {
+      setError(err.response?.data?.detail || "Failed to load hero images")
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { fetchImages() }, [fetchImages])
+
+  const addImage = async (file, sortOrder) => {
+    await heroImagesApi.add(file, sortOrder)
+    await fetchImages()
+  }
+
+  const updateImage = async (id, data) => {
+    await heroImagesApi.update(id, data)
+    await fetchImages()
+  }
+
+  const removeImage = async (id) => {
+    await heroImagesApi.remove(id)
+    await fetchImages()
+  }
+
+  // Swap sort_order with the neighboring image to move up/down in the list.
+  const reorder = async (id, direction) => {
+    const idx = images.findIndex(i => i.id === id)
+    const swapIdx = direction === "up" ? idx - 1 : idx + 1
+    if (idx === -1 || swapIdx < 0 || swapIdx >= images.length) return
+    const a = images[idx]
+    const b = images[swapIdx]
+    await Promise.all([
+      heroImagesApi.update(a.id, { sort_order: b.sort_order }),
+      heroImagesApi.update(b.id, { sort_order: a.sort_order }),
     ])
     await fetchImages()
   }

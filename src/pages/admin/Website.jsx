@@ -1,12 +1,13 @@
-// src/pages/admin/Website.jsx
 import { useState } from "react"
-import { useSiteContent, useGallery } from "@/hooks/useWebsiteContent"
+import { useSiteContent, useGallery, useHeroImages } from "@/hooks/useWebsiteContent"
 import SiteContentEditor from "@/components/admin/SiteContentEditor"
 import GalleryManager from "@/components/admin/GalleryManager"
+import HeroImagesManager from "@/components/admin/HeroImagesManager"
 import { cn } from "@/lib/utils"
 
 const TABS = [
   { id: "content", label: "Page Content" },
+  { id: "hero", label: "Hero Slideshow" },
   { id: "gallery", label: "Gallery" },
 ]
 
@@ -15,6 +16,7 @@ export default function AdminWebsite() {
 
   const content = useSiteContent()
   const gallery = useGallery()
+  const hero = useHeroImages()
 
   return (
     <div className="space-y-6">
@@ -47,6 +49,17 @@ export default function AdminWebsite() {
           values={content.values}
           loading={content.loading}
           saveValues={content.saveValues}
+        />
+      )}
+
+      {tab === "hero" && (
+        <HeroImagesManager
+          images={hero.images}
+          loading={hero.loading}
+          addImage={hero.addImage}
+          updateImage={hero.updateImage}
+          removeImage={hero.removeImage}
+          reorder={hero.reorder}
         />
       )}
 

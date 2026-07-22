@@ -5,8 +5,9 @@ import { SignInButton, useUser } from "@clerk/clerk-react"
 import { Button } from "@/components/ui/button"
 import { Mail, MapPin, Phone } from "lucide-react"
 import ScrollFilament from "@/components/common/ScrollFilament"
-import { siteContentApi, galleryApi, showcaseApi, eventsApi } from "@/lib/api"
+import { siteContentApi, galleryApi, showcaseApi, eventsApi, heroImagesApi } from "@/lib/api"
 import EventSpotlight from "@/components/common/EventSpotlight"
+import { cn } from "@/lib/utils"
 
 // Everything below is served from the admin-editable backend (Website tab in
 // the admin dashboard). These DEFAULT_* values are only a fallback so the
@@ -242,6 +243,8 @@ export default function Home() {
   const [showcase, setShowcase] = useState(DEFAULT_SHOWCASE)
   const [gallery, setGallery] = useState(DEFAULT_GALLERY)
   const [event, setEvent] = useState(null) // no default — section only renders if admin set one
+  const [heroImages, setHeroImages] = useState([]) // slideshow photos; empty = fall back to content.hero_bg_url
+  const [heroIndex, setHeroIndex] = useState(0)
 
   useEffect(() => {
     siteContentApi.get()
@@ -256,7 +259,20 @@ export default function Home() {
     eventsApi.getActive()
       .then(res => setEvent(res.data.length ? res.data[0] : null))
       .catch(() => {})
+    heroImagesApi.getPublic()
+      .then(res => setHeroImages(res.data))
+      .catch(() => {})
   }, [])
+
+  // Advance the hero slideshow every 2 seconds. Only runs once there are
+  // at least 2 active images — a single (or zero) image just stays put.
+  useEffect(() => {
+    if (heroImages.length < 2) return
+    const id = setInterval(() => {
+      setHeroIndex(i => (i + 1) % heroImages.length)
+    }, 2000)
+    return () => clearInterval(id)
+  }, [heroImages.length])
 
   // Admin edits this as one text area; a blank line between lines of text
   // is what breaks it into separate <p> paragraphs below.
@@ -284,20 +300,34 @@ export default function Home() {
     <main>
       <section
         id="hero"
-        className="relative min-h-[90vh] flex items-center justify-center overflow-hidden"
+        className="relative min-h-dvh flex items-center justify-center overflow-hidden"
         style={{ paddingTop: "calc(4rem + var(--announcement-h, 0px))" }}
       >
         <div className="absolute inset-0">
-          <img
-            src={content.hero_bg_url}
-            alt=""
-            className="h-full w-full object-cover opacity-70"
-          />
+          {heroImages.length > 0 ? (
+            heroImages.map((img, i) => (
+              <img
+                key={img.id}
+                src={img.image_url}
+                alt=""
+                className={cn(
+                  "absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ease-in-out",
+                  i === heroIndex ? "opacity-70" : "opacity-0"
+                )}
+              />
+            ))
+          ) : (
+            <img
+              src={content.hero_bg_url}
+              alt=""
+              className="h-full w-full object-cover opacity-70"
+            />
+          )}
           <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-primary/15 to-black/90" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_55%,rgba(0,0,0,0.85)_100%)]" />
         </div>
 
-        <div className="relative z-10 text-center max-w-3xl mx-auto px-6 space-y-8">
+        <div className="dark relative z-10 text-center max-w-3xl mx-auto px-6 space-y-8">
           <img
             src={content.logo_url}
             alt="EnergyLab"
@@ -322,7 +352,7 @@ export default function Home() {
                 </Button>
               </SignInButton>
             )}
-            <Button asChild size="lg" variant="outline" className="bg-background/60 backdrop-blur-sm">
+            <Button asChild size="lg" variant="outline" className="border-white/70 bg-white/15 text-white backdrop-blur-sm hover:bg-white hover:text-black transition-all duration-300">
               <a href="#services">Our Services</a>
             </Button>
           </div>
