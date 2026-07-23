@@ -1,13 +1,19 @@
 import { useEffect, useState } from "react"
-import { bookingsApi, usersApi } from "@/lib/api"
+import { bookingsApi, usersApi, analyticsApi } from "@/lib/api"
 import { Calendar, Users, Clock, CheckCircle } from "lucide-react"
+import AnalyticsSection from "@/components/admin/AnalyticsCharts"
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({ pending: 0, accepted: 0, today: 0, customers: 0 })
+  const [analytics, setAnalytics] = useState(null)
 
   useEffect(() => {
     const load = async () => {
-      const [bRes, uRes] = await Promise.all([bookingsApi.getAll(), usersApi.getAll()])
+      const [bRes, uRes, aRes] = await Promise.all([
+        bookingsApi.getAll(),
+        usersApi.getAll(),
+        analyticsApi.getDashboard(),
+      ])
       const bookings = bRes.data
       const today    = new Date().toISOString().split("T")[0]
       setStats({
@@ -16,6 +22,7 @@ export default function AdminDashboard() {
         today:     bookings.filter(b => b.time_slot?.date === today && b.status === "accepted").length,
         customers: uRes.data.filter(u => u.role === "customer").length,
       })
+      setAnalytics(aRes.data)
     }
     load().catch(() => {})
   }, [])
@@ -39,6 +46,7 @@ export default function AdminDashboard() {
           </div>
         ))}
       </div>
+      <AnalyticsSection analytics={analytics} />
     </div>
   )
 }

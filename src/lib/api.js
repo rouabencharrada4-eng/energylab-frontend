@@ -131,3 +131,6 @@ export const heroImagesApi = {
   update: (id, data) => api.put(`/hero-images/${id}`, data),
   remove: (id)       => api.delete(`/hero-images/${id}`),
 }
+export const analyticsApi = {
+  getDashboard: (params) => api.get("/analytics/dashboard", { params }),
+}
