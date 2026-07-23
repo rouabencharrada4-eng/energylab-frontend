@@ -11,15 +11,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import { CheckCircle, ArrowRight, Loader2 } from "lucide-react"
-
-const FITNESS_GOALS = [
-  "Weight Loss",
-  "Muscle Gain",
-  "Bodybuilding",
-  "General Fitness",
-  "Flexibility & Mobility",
-  "Other",
-]
+import { FITNESS_GOALS } from "@/lib/constants"
 
 export default function CompleteProfile() {
   const { user: clerkUser } = useUser()

@@ -10,8 +10,13 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { PasswordInput } from "@/components/ui/password-input"
 import { Label } from "@/components/ui/label"
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select"
 import { Loader2 } from "lucide-react"
+import { FITNESS_GOALS } from "@/lib/constants"
 
 function GoogleIcon(props) {
   return (
@@ -48,7 +53,10 @@ const OAUTH_PROVIDERS = [
 ]
 
 const EMPTY_SIGN_IN = { email: "", password: "" }
-const EMPTY_SIGN_UP = { firstName: "", lastName: "", email: "", password: "", confirmPassword: "", phone: "", address: "" }
+const EMPTY_SIGN_UP = {
+  firstName: "", lastName: "", email: "", password: "", confirmPassword: "",
+  phone: "", address: "", age: "", weight_kg: "", height_cm: "", fitness_goal: "",
+}
 
 // Turns Clerk's error shape into a plain, readable message.
 function readError(err, fallback) {
@@ -133,6 +141,10 @@ export function AuthModal({ open, onOpenChange, defaultMode = "sign-in" }) {
       setError("Passwords don't match.")
       return
     }
+    if (!signUpForm.fitness_goal) {
+      setError("Please select a fitness goal.")
+      return
+    }
     setLoading(true)
     setError("")
     try {
@@ -141,12 +153,18 @@ export function AuthModal({ open, onOpenChange, defaultMode = "sign-in" }) {
         lastName: signUpForm.lastName,
         emailAddress: signUpForm.email,
         password: signUpForm.password,
-        // Clerk doesn't have native "phone" (unverified) or "address" fields,
-        // so these ride along as unsafeMetadata and get picked up by the
-        // backend webhook after sign-up completes.
+        // Clerk doesn't have native fields for any of these (unverified
+        // phone, address, or our own fitness-profile fields), so they ride
+        // along as unsafeMetadata and get picked up by the backend webhook
+        // (or its self-heal fallback) right after sign-up completes —
+        // same fields CompleteProfile collects for Google/Facebook users.
         unsafeMetadata: {
           phone: signUpForm.phone,
           address: signUpForm.address,
+          age: Number(signUpForm.age),
+          weight_kg: Number(signUpForm.weight_kg),
+          height_cm: Number(signUpForm.height_cm),
+          fitness_goal: signUpForm.fitness_goal,
         },
       })
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" })
@@ -241,8 +259,7 @@ export function AuthModal({ open, onOpenChange, defaultMode = "sign-in" }) {
               </div>
               <div className="space-y-1.5">
                 <Label>Password</Label>
-                <Input
-                  type="password"
+                <PasswordInput
                   required
                   value={signInForm.password}
                   onChange={e => setSignInForm(f => ({ ...f, password: e.target.value }))}
@@ -299,8 +316,7 @@ export function AuthModal({ open, onOpenChange, defaultMode = "sign-in" }) {
               </div>
               <div className="space-y-1.5">
                 <Label>Password</Label>
-                <Input
-                  type="password"
+                <PasswordInput
                   required
                   value={signUpForm.password}
                   onChange={e => setSignUpForm(f => ({ ...f, password: e.target.value }))}
@@ -308,8 +324,7 @@ export function AuthModal({ open, onOpenChange, defaultMode = "sign-in" }) {
               </div>
               <div className="space-y-1.5">
                 <Label>Confirm password</Label>
-                <Input
-                  type="password"
+                <PasswordInput
                   required
                   value={signUpForm.confirmPassword}
                   onChange={e => setSignUpForm(f => ({ ...f, confirmPassword: e.target.value }))}
@@ -329,6 +344,65 @@ export function AuthModal({ open, onOpenChange, defaultMode = "sign-in" }) {
                   value={signUpForm.address}
                   onChange={e => setSignUpForm(f => ({ ...f, address: e.target.value }))}
                 />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label>Age</Label>
+                  <Input
+                    type="number"
+                    required
+                    min={10}
+                    max={100}
+                    placeholder="28"
+                    value={signUpForm.age}
+                    onChange={e => setSignUpForm(f => ({ ...f, age: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Weight (kg)</Label>
+                  <Input
+                    type="number"
+                    required
+                    min={20}
+                    max={300}
+                    step="0.1"
+                    placeholder="70"
+                    value={signUpForm.weight_kg}
+                    onChange={e => setSignUpForm(f => ({ ...f, weight_kg: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label>Height (cm)</Label>
+                <Input
+                  type="number"
+                  required
+                  min={100}
+                  max={250}
+                  step="0.1"
+                  placeholder="175"
+                  value={signUpForm.height_cm}
+                  onChange={e => setSignUpForm(f => ({ ...f, height_cm: e.target.value }))}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label>Fitness goal</Label>
+                <Select
+                  value={signUpForm.fitness_goal}
+                  onValueChange={(v) => setSignUpForm(f => ({ ...f, fitness_goal: v }))}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a goal" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {FITNESS_GOALS.map(goal => (
+                      <SelectItem key={goal} value={goal}>{goal}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Required by Clerk when bot-protection (Smart CAPTCHA) is on — stays invisible unless triggered */}
