@@ -4,6 +4,9 @@ import axios from "axios"
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "",
   headers: { "Content-Type": "application/json" },
+  // Render's free tier can take a while to wake from a cold start — give
+  // requests real room instead of hanging forever with no feedback.
+  timeout: 30000,
 })
 
 // Called once from App.jsx after Clerk loads
@@ -19,7 +22,7 @@ api.interceptors.request.use(async (config) => {
       const token = await Promise.race([
         _getToken({ skipCache: true }),
         new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("getToken timeout")), 5000)
+          setTimeout(() => reject(new Error("getToken timeout")), 10000)
         ),
       ])
       if (token) {

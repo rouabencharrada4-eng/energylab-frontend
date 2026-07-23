@@ -8,6 +8,7 @@ import Sidebar             from "@/components/layout/Sidebar"
 import AnnouncementBanner  from "@/components/common/AnnouncementBanner"
 import { ProtectedRoute }  from "@/components/common/ProtectedRoute"
 import { ProfileCompletionGate } from "@/components/common/ProfileCompletionGate"
+import { CurrentUserProvider } from "@/context/CurrentUserContext"
 
 import Home from "@/pages/public/Home"
 import Privacy from "@/pages/public/Privacy"
@@ -49,57 +50,59 @@ export default function App() {
   return (
     <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
       <ApiAuthInit />
-      <BrowserRouter>
-        <ProfileCompletionGate />
-        <AnnouncementBanner />
-        <Navbar />
+      <CurrentUserProvider>
+        <BrowserRouter>
+          <ProfileCompletionGate />
+          <AnnouncementBanner />
+          <Navbar />
 
-        <Routes>
-          {/* Public — single-page vitrine, everything lives on "/" as sections */}
-          <Route path="/" element={<Home />} />
-          <Route path="/privacy" element={<Privacy />} />
+          <Routes>
+            {/* Public — single-page vitrine, everything lives on "/" as sections */}
+            <Route path="/" element={<Home />} />
+            <Route path="/privacy" element={<Privacy />} />
 
-          {/* Google/Facebook sign-in bounces through here on its way back */}
-          <Route path="/sso-callback" element={<AuthenticateWithRedirectCallback />} />
+            {/* Google/Facebook sign-in bounces through here on its way back */}
+            <Route path="/sso-callback" element={<AuthenticateWithRedirectCallback />} />
 
-          {/* Old bookmarks/links still resolve — they just land on the section */}
-          <Route path="/services" element={<Navigate to="/#services" replace />} />
-          <Route path="/contact"  element={<Navigate to="/#contact"  replace />} />
+            {/* Old bookmarks/links still resolve — they just land on the section */}
+            <Route path="/services" element={<Navigate to="/#services" replace />} />
+            <Route path="/contact"  element={<Navigate to="/#contact"  replace />} />
 
-          {/* Customer — its own page, outside the vitrine */}
-          <Route path="/dashboard" element={<ProtectedRoute><CustomerDashboard /></ProtectedRoute>} />
-          <Route path="/book"      element={<ProtectedRoute><BookingNew /></ProtectedRoute>}        />
-          <Route path="/complete-profile" element={<ProtectedRoute><CompleteProfile /></ProtectedRoute>} />
+            {/* Customer — its own page, outside the vitrine */}
+            <Route path="/dashboard" element={<ProtectedRoute><CustomerDashboard /></ProtectedRoute>} />
+            <Route path="/book"      element={<ProtectedRoute><BookingNew /></ProtectedRoute>}        />
+            <Route path="/complete-profile" element={<ProtectedRoute><CompleteProfile /></ProtectedRoute>} />
 
-          {/* Admin — its own page, outside the vitrine */}
-          <Route path="/admin" element={
-            <ProtectedRoute requireAdmin><AdminLayout><AdminDashboard /></AdminLayout></ProtectedRoute>
-          } />
-          <Route path="/admin/bookings" element={
-            <ProtectedRoute requireAdmin><AdminLayout><AdminBookings /></AdminLayout></ProtectedRoute>
-          } />
-          <Route path="/admin/time-slots" element={
-            <ProtectedRoute requireAdmin><AdminLayout><AdminTimeSlots /></AdminLayout></ProtectedRoute>
-          } />
-          <Route path="/admin/services" element={
-            <ProtectedRoute requireAdmin><AdminLayout><AdminServices /></AdminLayout></ProtectedRoute>
-          } />
-          <Route path="/admin/website" element={
-            <ProtectedRoute requireAdmin><AdminLayout><AdminWebsite /></AdminLayout></ProtectedRoute>
-          } />
-          <Route path="/admin/events" element={
-            <ProtectedRoute requireAdmin><AdminLayout><AdminEvents /></AdminLayout></ProtectedRoute>
-          } />
-          <Route path="/admin/users" element={
-            <ProtectedRoute requireAdmin><AdminLayout><AdminUsers /></AdminLayout></ProtectedRoute>
-          } />
-          <Route path="/admin/announcements" element={
-            <ProtectedRoute requireAdmin><AdminLayout><AdminAnnouncements /></AdminLayout></ProtectedRoute>
-          } />
-        </Routes>
+            {/* Admin — its own page, outside the vitrine */}
+            <Route path="/admin" element={
+              <ProtectedRoute requireAdmin><AdminLayout><AdminDashboard /></AdminLayout></ProtectedRoute>
+            } />
+            <Route path="/admin/bookings" element={
+              <ProtectedRoute requireAdmin><AdminLayout><AdminBookings /></AdminLayout></ProtectedRoute>
+            } />
+            <Route path="/admin/time-slots" element={
+              <ProtectedRoute requireAdmin><AdminLayout><AdminTimeSlots /></AdminLayout></ProtectedRoute>
+            } />
+            <Route path="/admin/services" element={
+              <ProtectedRoute requireAdmin><AdminLayout><AdminServices /></AdminLayout></ProtectedRoute>
+            } />
+            <Route path="/admin/website" element={
+              <ProtectedRoute requireAdmin><AdminLayout><AdminWebsite /></AdminLayout></ProtectedRoute>
+            } />
+            <Route path="/admin/events" element={
+              <ProtectedRoute requireAdmin><AdminLayout><AdminEvents /></AdminLayout></ProtectedRoute>
+            } />
+            <Route path="/admin/users" element={
+              <ProtectedRoute requireAdmin><AdminLayout><AdminUsers /></AdminLayout></ProtectedRoute>
+            } />
+            <Route path="/admin/announcements" element={
+              <ProtectedRoute requireAdmin><AdminLayout><AdminAnnouncements /></AdminLayout></ProtectedRoute>
+            } />
+          </Routes>
 
-        <Footer />
-      </BrowserRouter>
+          <Footer />
+        </BrowserRouter>
+      </CurrentUserProvider>
     </ClerkProvider>
   )
 }
