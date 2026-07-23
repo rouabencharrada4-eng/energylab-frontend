@@ -36,6 +36,7 @@ api.interceptors.request.use(async (config) => {
 
 export const usersApi = {
   me:            ()         => api.get("/users/me"),
+  update:        (data)     => api.patch("/users/me", data),
   getAll:        ()         => api.get("/users"),
   deleteAccount: ()         => api.delete("/users/me"),
 }

@@ -7,6 +7,7 @@ import Footer              from "@/components/layout/Footer"
 import Sidebar             from "@/components/layout/Sidebar"
 import AnnouncementBanner  from "@/components/common/AnnouncementBanner"
 import { ProtectedRoute }  from "@/components/common/ProtectedRoute"
+import { ProfileCompletionGate } from "@/components/common/ProfileCompletionGate"
 
 import Home from "@/pages/public/Home"
 import Privacy from "@/pages/public/Privacy"
@@ -22,6 +23,7 @@ import AdminEvents        from "@/pages/admin/Events"
 
 import CustomerDashboard from "@/pages/customer/Dashboard"
 import BookingNew        from "@/pages/customer/BookingNew"
+import CompleteProfile   from "@/pages/customer/CompleteProfile"
 
 import { initApiAuth } from "@/lib/api"
 import { useAuth } from "@clerk/clerk-react"
@@ -48,6 +50,7 @@ export default function App() {
     <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
       <ApiAuthInit />
       <BrowserRouter>
+        <ProfileCompletionGate />
         <AnnouncementBanner />
         <Navbar />
 
@@ -66,6 +69,7 @@ export default function App() {
           {/* Customer — its own page, outside the vitrine */}
           <Route path="/dashboard" element={<ProtectedRoute><CustomerDashboard /></ProtectedRoute>} />
           <Route path="/book"      element={<ProtectedRoute><BookingNew /></ProtectedRoute>}        />
+          <Route path="/complete-profile" element={<ProtectedRoute><CompleteProfile /></ProtectedRoute>} />
 
           {/* Admin — its own page, outside the vitrine */}
           <Route path="/admin" element={
