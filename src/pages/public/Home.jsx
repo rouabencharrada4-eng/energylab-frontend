@@ -1,12 +1,13 @@
 // src/pages/public/Home.jsx
 import { useCallback, useEffect, useState } from "react"
 import { useLocation, Link } from "react-router-dom"
-import { SignInButton, useUser } from "@clerk/clerk-react"
+import { useUser } from "@clerk/clerk-react"
 import { Button } from "@/components/ui/button"
 import { Mail, MapPin, Phone } from "lucide-react"
 import ScrollFilament from "@/components/common/ScrollFilament"
 import { siteContentApi, galleryApi, showcaseApi, eventsApi, heroImagesApi } from "@/lib/api"
 import EventSpotlight from "@/components/common/EventSpotlight"
+import { AuthModal } from "@/components/auth/AuthModal"
 import { cn } from "@/lib/utils"
 
 // Everything below is served from the admin-editable backend (Website tab in
@@ -121,6 +122,7 @@ function formatEventDate(iso) {
 function ShowcaseCard({ item }) {
   const [ref, visible] = useReveal()
   const { isSignedIn } = useUser()
+  const [authOpen, setAuthOpen] = useState(false)
   const isRight = item.align === "right"
 
   return (
@@ -149,11 +151,16 @@ function ShowcaseCard({ item }) {
               <Link to="/book">Book Now</Link>
             </Button>
           ) : (
-            <SignInButton mode="modal">
-              <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground">
+            <>
+              <Button
+                size="sm"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                onClick={() => setAuthOpen(true)}
+              >
                 Book Now
               </Button>
-            </SignInButton>
+              <AuthModal open={authOpen} onOpenChange={setAuthOpen} defaultMode="sign-in" />
+            </>
           )
         )}
       </div>
@@ -238,6 +245,7 @@ export default function Home() {
   const location = useLocation()
   const [aboutRef, aboutVisible] = useReveal()
   const [eventRef, eventVisible] = useReveal()
+  const [authOpen, setAuthOpen] = useState(false)
 
   const [content, setContent] = useState(DEFAULT_CONTENT)
   const [showcase, setShowcase] = useState(DEFAULT_SHOWCASE)
@@ -346,11 +354,13 @@ export default function Home() {
                 <Link to="/book">Book a Session</Link>
               </Button>
             ) : (
-              <SignInButton mode="modal">
-                <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                  Get Started
-                </Button>
-              </SignInButton>
+              <Button
+                size="lg"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                onClick={() => setAuthOpen(true)}
+              >
+                Get Started
+              </Button>
             )}
             <Button asChild size="lg" variant="outline" className="border-white/70 bg-white/15 text-white backdrop-blur-sm hover:bg-white hover:text-black transition-all duration-300">
               <a href="#services">Our Services</a>
@@ -457,6 +467,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+      <AuthModal open={authOpen} onOpenChange={setAuthOpen} defaultMode="sign-up" />
     </main>
   )
 }
